@@ -18,7 +18,7 @@ export default function Login() {
     return (
         <div className="flex h-screen">
             {/* Left Section */}
-            <div className="w-3/5 bg-black p-12 flex flex-col">
+            <div className="w-1/2 bg-black p-12 flex flex-col">
                 <div>
                     <div className="text-white font-bold text-[3rem]">*</div>
                 </div>
@@ -36,7 +36,7 @@ export default function Login() {
             </div>
 
             {/* Right Section */}
-            <div className="w-2/5 p-12 flex flex-col justify-center">
+            <div className="w-1/2 p-12 flex flex-col justify-center">
                 <div className="max-w-md mx-auto w-full">
                     <h2 className="text-1xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 pb-20">SaleSkip</h2>
                     <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2">Welcome Back!</h3>

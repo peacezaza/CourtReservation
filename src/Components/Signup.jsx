@@ -4,7 +4,7 @@ export default function Signup() {
     return (
         <div className="flex flex-row h-screen">
             {/*Left Side*/}
-            <div className="w-1/2 bg-black text-white flex flex-col justify-between pt-10 pb-20">
+            <div className="w-1/2 bg-black text-white flex flex-col justify-around pt-10 pb-20">
                 <p className="font-bold text-[50px] pl-10">*</p>
 
                 <div className="pl-5 w-2/3">
@@ -27,19 +27,19 @@ export default function Signup() {
                     <div className="w-full flex justify-center">
                         <input
                             placeholder="Email"
-                            className="w-4/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
+                            className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
                     <div className="w-full flex justify-center">
                         <input
                             placeholder="Password"
-                            className="w-4/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
+                            className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
                     <div className="w-full flex justify-center">
                         <input
                             placeholder="Confirm Password"
-                            className="w-4/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
+                            className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
                     <p className="text-gray-400 flex justify-center">I agree to the <a href="#"
@@ -47,7 +47,7 @@ export default function Signup() {
                         & Conditions</a>and <a href="#" className="font-bold underline text-gray-600">Privacy Policy</a>
                     </p>
                     <div className="flex justify-center text-white">
-                        <button className=" bg-black border w-4/5 p-3 rounded-lg">Sign up</button>
+                        <button className=" bg-black border w-3/5 p-3 rounded-lg">Sign up</button>
                     </div>
 
                 </form>
@@ -61,7 +61,7 @@ export default function Signup() {
                 <p>Use your social profile to register</p>
                 <button
                     type="button"
-                    className="w-4/5 border border-gray-300 p-3 rounded-lg flex items-center justify-center space-x-2"
+                    className="w-3/5 border border-gray-300 p-3 rounded-lg flex items-center justify-center space-x-2"
                 >
                     <svg viewBox="0 0 24 24" width="24" height="24" className="text-gray-600">
                         <path

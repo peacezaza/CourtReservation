@@ -18,16 +18,16 @@ export default function Login() {
     return (
         <div className="flex h-screen">
             {/* Left Section */}
-            <div className="w-3/5 bg-[#2243E8] p-12 flex flex-col">
+            <div className="w-3/5 bg-black p-12 flex flex-col">
                 <div>
-                    <div className="text-white text-3xl mb-2">*</div>
+                    <div className="text-white font-bold text-[3rem]">*</div>
                 </div>
                 <div className="flex-grow flex flex-col justify-center">
                 <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-4">
-                    Hello<br />Terkcode!🖕<br />
+                    Hello<br />Terkcode!<br />
                 </h1>
-                    <p className="text-white/90 text-0.25xl sm:text-0.5xl md:text-1xl lg:text-2xl max-w-2xl">
-                    Hello, Welcome, Have Room, Have Condom Have K-Y, Good Take Care, Do Everything Fuck Ass, Fuck Pussy Suck Your Dick, Lick Your Body Suck Long Way, Good Job, Blow Job Hand Job, Foot Job, Pussy Job, Ass Job Fuck My Ass Cum In My Mouth Fuck My Mouth Cum In My Ass Look into my eyes, Thank you xoxo
+                    <p className="text-white/90 sm:text-0.5xl md:text-xl lg:text-xl max-w-2xl">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                     </p>
                 </div>
                 <div className="text-white/70 text-sm">
@@ -38,7 +38,7 @@ export default function Login() {
             {/* Right Section */}
             <div className="w-2/5 p-12 flex flex-col justify-center">
                 <div className="max-w-md mx-auto w-full">
-                    <h2 className="text-1xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2">SaleSkip<br /><br /><br /></h2>
+                    <h2 className="text-1xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 pb-20">SaleSkip</h2>
                     <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2">Welcome Back!</h3>
                     <p className="text-gray-600 mb-6">
                         Don't have an account? <a href="#" className="text-[#2243E8]">Create a new account now.</a>

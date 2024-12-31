@@ -1,12 +1,30 @@
-
+import { useState } from "react";
+import axios from 'axios';
 
 export default function Signup() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+
+    const onHandleSubmit = (event) => {
+        event.preventDefault();
+        axios.post("http://localhost:3000/signup", {
+            email : email,
+            password: password,
+            confirmPassword : confirmPassword
+        })
+
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+    }
+
     return (
         <div className="flex flex-row h-screen">
             {/*Left Side*/}
             <div className="w-1/2 bg-black text-white flex flex-col justify-around pt-10 pb-20">
                 <p className="font-bold text-[50px] pl-10">*</p>
-
                 <div className="pl-5 w-2/3">
                     <p className="pl-5 text-[100px] font-bold">Hello</p>
                     <p className="pl-5 text-[100px] font-bold">Terkcode!</p>
@@ -23,22 +41,30 @@ export default function Signup() {
             <div className="w-1/2 bg-white flex flex-col items-center justify-center space-y-5">
                 <p className="font-bold text-3xl">Register Account</p>
                 <p className="text-gray-400">Try now for FREE! Takes less than a minute.</p>
-                <form className="w-full flex flex-col space-y-5">
+                <form className="w-full flex flex-col space-y-5" onSubmit={onHandleSubmit}>
                     <div className="w-full flex justify-center">
                         <input
                             placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
                     <div className="w-full flex justify-center">
                         <input
                             placeholder="Password"
+                            value = {password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            type="password"
                             className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
                     <div className="w-full flex justify-center">
                         <input
                             placeholder="Confirm Password"
+                            type="password"
+                            value = {confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
@@ -47,11 +73,11 @@ export default function Signup() {
                         & Conditions</a>and <a href="#" className="font-bold underline text-gray-600">Privacy Policy</a>
                     </p>
                     <div className="flex justify-center text-white">
-                        <button className=" bg-black border w-3/5 p-3 rounded-lg">Sign up</button>
+                        <button className=" bg-black border w-3/5 p-3 rounded-lg" type="submit">Sign up</button>
                     </div>
 
                 </form>
-                <p className="text-gray-400">Already have an account? <a className="underline font-bold text-gray-600"
+                <p className="text-gray-400 ">Already have an account? <a className="underline font-bold text-gray-600"
                                                                          href="#">Login here</a></p>
                 <div className="w-full flex flex-row items-center justify-center space-x-3">
                     <hr className="w-1/4 border-black"/>

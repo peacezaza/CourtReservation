@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from 'axios';
+import {Link} from "react-router-dom";
 
 export default function Signup() {
     const [email, setEmail] = useState('');
@@ -26,15 +27,9 @@ export default function Signup() {
             <div className="w-1/2 bg-black text-white flex flex-col justify-around pt-10 pb-20">
                 <p className="font-bold text-[50px] pl-10">*</p>
                 <div className="pl-5 w-2/3">
-                    <p className="pl-5 text-[100px] font-bold">Hello</p>
-                    <p className="pl-5 text-[100px] font-bold">Terkcode!</p>
-                    <p className="text-gray-400">Lorem Ipsum is simply dummy text of the printing and typesetting
-                        industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an
-                        unknown printer took a galley of type and scrambled it to make a type specimen book. It has
-                        survived not only five centuries, but also the leap into electronic typesetting, remaining
-                        essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
-                        containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus
-                        PageMaker including versions of Lorem Ipsum.</p>
+                    <p className="pl-5 text-[100px] font-bold"></p>
+                    <p className="pl-5 text-[100px] font-bold">Why US?</p>
+                    <p className="text-gray-300">Manage your sports facilities seamlessly with Terkcode, a platform designed to help field owners optimize operations, attract more customers, and increase revenue. Add and manage multiple locations effortlessly, update schedules in real-time, and monitor bookings and revenue through advanced analytics. Gain insights into field utilization rates and booking trends to make data-driven decisions that boost profitability. Simplify payment processing with secure and transparent transactions, ensuring hassle-free management for both you and your customers. Leverage customer feedback and reviews to improve services and build trust with players. Promote your fields to a growing community of sports enthusiasts and fill empty time slots with targeted marketing tools. With Terkcode, you can focus on growing your business while we take care of the rest. Sign up today and transform the way you manage your sports facilities!</p>
                 </div>
             </div>
             {/*Right Side*/}
@@ -68,17 +63,22 @@ export default function Signup() {
                             className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
-                    <p className="text-gray-400 flex justify-center">I agree to the <a href="#"
-                                                                                       className="font-bold text-gray-600 underline">Terms
-                        & Conditions</a>and <a href="#" className="font-bold underline text-gray-600">Privacy Policy</a>
-                    </p>
+                    <div className="flex flex-row justify-center space-x-5">
+                        <input className="" type="checkbox" />
+                        <p className="text-gray-400 flex justify-center">I agree to the <a href="#"
+                                                                                           className="font-bold text-gray-600 underline">Terms
+                            & Conditions</a>and <a href="#" className="font-bold underline text-gray-600">Privacy
+                            Policy</a>
+                        </p>
+                    </div>
+
                     <div className="flex justify-center text-white">
-                        <button className=" bg-black border w-3/5 p-3 rounded-lg" type="submit">Sign up</button>
+                        <Link to="/dashboard" className=" bg-black border w-3/5 p-3 rounded-lg text-center" type="submit">Sign Up</Link>
                     </div>
 
                 </form>
                 <p className="text-gray-400 ">Already have an account? <a className="underline font-bold text-gray-600"
-                                                                         href="#">Login here</a></p>
+                                                                          href="/login">Login here</a></p>
                 <div className="w-full flex flex-row items-center justify-center space-x-3">
                     <hr className="w-1/4 border-black"/>
                     <p className="font-bold">OR</p>

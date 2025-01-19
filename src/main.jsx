@@ -5,6 +5,7 @@ import './index.css'
 import Login from './Components/Login.jsx'
 import Signup from './Components/Signup.jsx'
 import HomePage from './Components/HomePage.jsx'
+import Dashboard from './Components/Dashboard.jsx'
 
 const router = createBrowserRouter([
     {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
     {
         path: "signup",
         element: (<Signup/>),
+    },
+    {
+        path: "dashboard",
+        element: (<Dashboard/>),
     }
 ]);
 

@@ -41,7 +41,7 @@ export default function Login() {
                     <h2 className="text-1xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 pb-20">SaleSkip</h2>
                     <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2">Welcome Back!</h3>
                     <p className="text-gray-600 mb-6">
-                        Don't have an account? <a href="#" className="text-[#2243E8]">Create a new account now.</a>
+                        Don't have an account? <a href="/signup" className="text-[#2243E8]">Create a new account now.</a>
                         <br />It's FREE! Takes less than a minute.
                     </p>
 

@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom";
 
-import badminton from "../../public/badminton.png"
+
 
 export default function HomePage(){
 

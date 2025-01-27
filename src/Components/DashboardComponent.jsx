@@ -1,23 +1,35 @@
+import {useEffect} from "react";
+import { Icon } from '@iconify/react';
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
 
 export default function DashboardComponent() {
+    let date = new Date();
+
+    const formettedDate = new Intl.DateTimeFormat('en-US',{
+        weekday: 'long',
+        day : "numeric",
+        month: "long",
+        year: "numeric",
+    }).format(date)
+
+    useEffect( () => {
+
+    })
+
+    const dataOptions = ["Weekly", "Monthly", "Yearly"];
+    const defaultDataOption = dataOptions[0];
+
+
+
+
     return (
         <div className="w-full h-screen flex flex-col">
         {/*    Top Part*/}
-            <div className="h-[7%] flex flex-row items-center justify-end space-x-5">
+            <div className="h-[7%] flex flex-row items-center justify-end space-x-5 mr-3">
                 <div className="flex flex-row space-x-2 items-center">
                     <div>
-                        <svg
-                            className="w-[32px] h-[32px]"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 32 32"
-                        >
-                            <polygon points="16,0 32,16 16,32 0,16" fill="#A020F0"/>
-                            <polygon points="16,0 24,16 16,24 8,16" fill="#C71585"/>
-                            <path
-                                d="M16 12 L17 15 L20 16 L17 17 L16 20 L15 17 L12 16 L15 15 Z"
-                                fill="white"
-                            />
-                        </svg>
+                        <Icon icon="noto:coin" className="w-9 h-9"/>
                     </div>
 
                     <div>2000</div>
@@ -42,12 +54,73 @@ export default function DashboardComponent() {
 
             </div>
             {/*    Middle Part*/}
-            <div></div>
+            <div className="flex flex-row items-center justify-between h-[6%]">
+                <div></div>
+                <div>{formettedDate.toString()}</div>
+                <div className="">
+                    <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4">Create Booking</button>
+                </div>
+            </div>
             {/*    Bottom Part*/}
-            <div>
-                <div></div>
-                <div></div>
-                <div></div>
+            <div className="bg-[#D1D5DB] h-full w-[100%] grid grid-rows-8 gap-5 py-5 ">
+                <div className="bg-white row-span-2 w-[95%] h-full place-self-center rounded-xl grid-rows-2">
+                    <div className="row-span-1 w-full h-[50%] bg-white rounded-t-xl flex flex-row justify-between px-3 items-center">
+                        <div className="font-semibold text-3xl">Overview</div>
+                        <div className="">
+                            <Dropdown className="border-2 " options={dataOptions} value={defaultDataOption} placeholder="Select an option" />
+                        </div>
+                    </div>
+                    <div className="row-span-1 w-full h-[50%] rounded-b-xl flex flex-row justify-around">
+                        <div className="flex flex-row gap-3">
+                            <div className="flex flex-col justify-start">
+                                <p className="text-[#9CA3AF]">Total</p>
+                                <p className="text-[#5D6679]">Revenue</p>
+                            </div>
+                            <div className="flex flex-row gap-3 items-start">
+                                <Icon icon="noto:coin" className="w-9 h-9"/>
+                                <p className="font-semibold text-2xl">2000</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-row ">
+                            <div className="flex flex-col justify-start">
+                                <p className="text-[#9CA3AF]">Total</p>
+                                <p className="text-[#5D6679]">Booking</p>
+                            </div>
+
+                            <div className="font-semibold text-2xl items-center">
+                                13
+                            </div>
+
+                        </div>
+
+                        <div className="flex flex-row ">
+                            <div className="flex flex-col justify-start">
+                                <p className="text-[#9CA3AF]">Active</p>
+                                <p className="text-[#5D6679]">Location</p>
+                            </div>
+
+                            <div className="font-semibold text-2xl items-center">
+                                2
+                            </div>
+
+                        </div>
+
+                        <div className="flex flex-row ">
+                            <div className="flex flex-col justify-start">
+                                <p className="text-[#9CA3AF]">Average</p>
+                                <p className="text-[#5D6679]">Utilization rate</p>
+                            </div>
+
+                            <div className="font-semibold text-2xl items-center">
+                                30%
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-blue-400 row-span-3 w-[95%] h-full place-self-center rounded-xl">aas</div>
+                <div className="bg-cyan-100 row-span-3 w-[95%] h-full place-self-center rounded-xl"></div>
             </div>
         </div>
     )

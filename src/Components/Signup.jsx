@@ -1,24 +1,61 @@
 import { useState } from "react";
 import axios from 'axios';
-import {Link} from "react-router-dom";
+import {Link, useNavigate } from "react-router-dom";
+
+import {setCustomIconsLoader} from "@iconify/react";
 
 export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordMatch, setPasswordMatch] = useState(true);
+
+    const navigate = useNavigate();
 
 
     const onHandleSubmit = (event) => {
         event.preventDefault();
-        axios.post("http://localhost:3000/signup", {
-            email : email,
-            password: password,
-            confirmPassword : confirmPassword
-        })
+        console.log("Clicked")
+        if(email !== "" && password !== "" && confirmPassword !== "") {
+            if(password === confirmPassword) {
+                setPasswordMatch(true);
+                axios.post("http://localhost:3000/signup", {
+                    email: email,
+                    password: password,
+                    user_type: "owner"
+                }).then((response) => {
+                    console.log(response.data);
+                    if(response.data.success){
+                        navigate("/dashboard");
+                    }
+                })
+            }
+            else{
+                setPasswordMatch(false);
+            }
+        }
 
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
+
+        // if(password === confirmPassword){
+        //     axios.post("http://localhost:3000/signup", {
+        //         email : email,
+        //         password: password,
+        //         confirmPassword : confirmPassword
+        //     })
+        // }
+        // else{
+        //     setPasswordMatch(false);
+        // }
+
+        // axios.post("http://localhost:3000/signup", {
+        //     email: email,
+        //     password: password,
+        //     user_type: "owner"
+        // })
+
+        // setEmail("");
+        // setPassword("");
+        // setConfirmPassword("");
     }
 
     return (
@@ -39,6 +76,7 @@ export default function Signup() {
                 <form className="w-full flex flex-col space-y-5" onSubmit={onHandleSubmit}>
                     <div className="w-full flex justify-center">
                         <input
+                            type="email"
                             placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -63,6 +101,7 @@ export default function Signup() {
                             className="w-3/5 p-3 border-b border-gray-600 focus:outline-none focus:border-[#2243E8]"
                         />
                     </div>
+                    {!passwordMatch && <div>sadfaf</div>}
                     <div className="flex flex-row justify-center space-x-5">
                         <input className="" type="checkbox" />
                         <p className="text-gray-400 flex justify-center">I agree to the <a href="#"
@@ -72,8 +111,16 @@ export default function Signup() {
                         </p>
                     </div>
 
-                    <div className="flex justify-center text-white">
-                        <Link to="/dashboard" className=" bg-black border w-3/5 p-3 rounded-lg text-center" type="submit">Sign Up</Link>
+                    <div className="flex justify-center">
+                        {/*                        <Link to="#" className="bg-black border w-3/5 p-3 text-center rounded-xl">
+                            <button type="submit" className="text-center">
+                                Sign up
+                            </button>
+                        </Link>*/}
+                        {/*<Link to="/dashboard" className="bg-black border w-3/5 p-3 rounded-lg text-center" />Sign up*/}
+                        <button type="submit" className="text-center bg-black border w-3/5 p-3 text-white rounded-xl">
+                            Sign up
+                        </button>
                     </div>
 
                 </form>

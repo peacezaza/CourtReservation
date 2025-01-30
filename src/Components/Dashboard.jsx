@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import { Icon } from '@iconify/react';
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from 'react-router-dom';
 
 // Local
 import DashboardComponent from './DashboardComponent'
@@ -13,6 +15,25 @@ export default function Dashboard() {
     const [isBookingOpen, setIsBookingOpen] = useState(false)
     const [isFacilityOpen, setIsFacilityOpen] = useState(false)
     const [isTransactionOpen, setIsTransactionOpen] = useState(false)
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if(token){
+            const decoded = jwtDecode(token);
+            const currentTime = Date.now() / 1000
+            if(decoded.exp < currentTime){
+                localStorage.removeItem("token");
+                navigate("/login");
+            }
+        }else{
+            navigate("/login");
+        }
+
+    })
+
 
     const handleNavClick = (event, param) => {
         event.preventDefault()

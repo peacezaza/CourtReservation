@@ -28,6 +28,7 @@ export default function Signup() {
                     console.log(response.data);
                     if(response.data.success){
                         navigate("/dashboard");
+                        localStorage.setItem("token", response.data.token);
                         setLoading(false);
                     }
                     else{

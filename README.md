@@ -1,6 +1,6 @@
 # หยุดทำโค้ดหมา
 
-![](Read_itDog_code/0.png)
+![1](Read_itDog_code/0.png)
 
 
 

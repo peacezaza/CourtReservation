@@ -1,6 +1,5 @@
 # หยุดทำโค้ดหมา
 
-![1](CourtReservation/Read_itDog_code/0.png)
 
 
 

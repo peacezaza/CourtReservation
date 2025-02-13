@@ -70,7 +70,7 @@ export default function FacilityComponent() {
             </div>
             <div className="row-span-9 bg-white">
                 <div className="flex justify-center items-center  h-full w-full">
-                    {isOpenOverlay && <AddStadiumOverlay/>}
+                    {isOpenOverlay && <AddStadiumOverlay setIsOpenOverlay={setIsOpenOverlay}/>}
                 </div>
             </div>
         </div>

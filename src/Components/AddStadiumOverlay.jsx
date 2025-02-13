@@ -1,23 +1,111 @@
 import {useState} from "react";
 import Multiselect from "multiselect-react-dropdown";
+import axios from 'axios';
 
 
-export default function AddStadiumOverlay(){
+export default function AddStadiumOverlay({setIsOpenOverlay}){
+
+
+    const typeOptions = ["Badminton", "Soccer", "Football", "Table Tennis"];
+
     const [files, setFiles] = useState([]);
-    const [ selectType, setSelectedType ] =useState([]);
-    const [typeDetails, setTypeDetails] = useState({});
-    const [ isTypeOpen, setIsTypeOpen ] = useState(false);
+    const [formData, setFormData] = useState({
+        stadium: "",
+        phone: "",
+        country: "",
+        province: "",
+        district: "",
+        subDistrict: "",
+        zipCode: "",
+        addressLink: "",
+        openHour: "",
+        closeHour: "",
+        facilities: "",
+        selectedTypes: [],
+        typeDetails: {},
+    });
 
-    const typeOptions = ["badminton", "soccer", "football", "table tennis"]
+    // Handle file upload
+    const handleFileChange = (event) => {
+        setFiles(Array.from(event.target.files));
+    };
 
-    const handleInputChange = (type, field, value) => {
-        setTypeDetails((prev) => ({
+    // Handle basic input change
+    const handleInputChange = (field, value) => {
+        setFormData({ ...formData, [field]: value });
+    };
+
+    // Handle multi-select dropdown
+    const handleTypeChange = (selectedList) => {
+        setFormData((prev) => ({
             ...prev,
-            [type]: {
-                ...prev[type],
-                [field]: value,
+            selectedTypes: selectedList.map((item) => item.name),
+        }));
+    };
+
+    // Handle court & cost input changes
+    const handleTypeDetailChange = (type, field, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            typeDetails: {
+                ...prev.typeDetails,
+                [type]: { ...prev.typeDetails[type], [field]: value },
             },
         }));
+    };
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log("Form Data:", formData);
+
+        if (files.length > 0) {
+            console.log("Selected Files:", files);
+        } else {
+            console.log("No files selected.");
+        }
+        const data = new FormData();
+
+        // Append text fields
+        Object.keys(formData).forEach((key) => {
+            data.append(key, formData[key]);
+        });
+
+        // Append files (assuming `files` is an array of File objects)
+        files.forEach((file, index) => {
+            data.append(`files`, file); // If multiple files, backend should handle array
+        });
+
+        try {
+            const response = await axios.post("http://localhost:3000/addStadium", data, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+
+            console.log("Upload Successful:", response.data);
+        } catch (error) {
+            console.error("Error uploading data:", error);
+        }
+    };
+
+    const handleCancel = (e) => {
+        e.preventDefault();
+        setIsOpenOverlay(false);
+        resetForm();
+    }
+
+    const resetForm = () => {
+        setFormData({
+            country: "",
+            province: "",
+            district: "",
+            subDistrict: "",
+            zipCode: "",
+            addressLink: "",
+            photo: null, // Reset photo
+        });
+        setFiles([]); // Clear files state
     };
 
 
@@ -25,33 +113,29 @@ export default function AddStadiumOverlay(){
     return(
         <div
             className="bg-white w-full max-w-2xl h-fit max-h-screen rounded-xl px-3 py-3 border-[1px] border-black overflow-auto">
-
             <div>
-                <form className="flex flex-col gap-5">
+                <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
                     <div className="flex flex-row justify-start items-center space-x-3 ">
                         <div className="w-14 h-14 bg-[#D0D3D9] rounded-full"></div>
                         <div>
-                            <label className=" cursor-pointer text-[#383E49]">
+                            <label className="cursor-pointer text-[#383E49]">
                                 {files.length === 0 ? "Add Images" : `${files.length} Images Selected`}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    // onChange={handleFileChange}
-                                    className="hidden" // Hide the default input
-                                />
+                                <input type="file" accept="image/*" multiple onChange={handleFileChange}
+                                       className="hidden"/>
                             </label>
                         </div>
                     </div>
                     <div className="flex flex-row w-full justify-between">
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Stadium</p>
-                            <input type="text" placeholder="Enter Stadium Name"
+                            <input type="text" placeholder="Enter Stadium Name" value={formData.stadium}
+                                   onChange={(e) => handleInputChange("stadium", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Phone Number</p>
-                            <input type="text" placeholder="Enter phone number"
+                            <input type="text" placeholder="Enter phone number" value={formData.phone}
+                                   onChange={(e) => handleInputChange("phone", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                     </div>
@@ -59,11 +143,15 @@ export default function AddStadiumOverlay(){
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Country</p>
                             <input type="text" placeholder="Select Country"
+                                   value={formData.country}
+                                   onChange={(e) => handleInputChange("country", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Province</p>
                             <input type="text" placeholder="Select Province"
+                                   value={formData.province}
+                                   onChange={(e) => handleInputChange("province", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                     </div>
@@ -71,11 +159,15 @@ export default function AddStadiumOverlay(){
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">District</p>
                             <input type="text" placeholder="Select District"
+                                   value={formData.district}
+                                   onChange={(e) => handleInputChange("district", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Sub-District</p>
                             <input type="text" placeholder="Select Sub-District"
+                                   value={formData.subDistrict}
+                                   onChange={(e) => handleInputChange("subDistrict", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                     </div>
@@ -83,11 +175,15 @@ export default function AddStadiumOverlay(){
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Zip Code</p>
                             <input type="text" placeholder="Select Zip Code"
+                                   value={formData.zipCode}
+                                   onChange={(e) => handleInputChange("zipCode", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Address Link</p>
                             <input type="text" placeholder="Enter Address Link"
+                                   value={formData.addressLink}
+                                   onChange={(e) => handleInputChange("addressLink", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                     </div>
@@ -95,11 +191,15 @@ export default function AddStadiumOverlay(){
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Open Hour</p>
                             <input type="text" placeholder="Select Open Hour"
+                                   value={formData.openHour}
+                                   onChange={(e) => handleInputChange("openHour", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Close Hour</p>
                             <input type="text" placeholder="Select Close Hour"
+                                   value={formData.closeHour}
+                                   onChange={(e) => handleInputChange("closeHour", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                     </div>
@@ -107,47 +207,31 @@ export default function AddStadiumOverlay(){
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Facilities</p>
                             <input type="text" placeholder="Select Facilities"
+                                   value={formData.facilities}
+                                   onChange={(e) => handleInputChange("facilities", e.target.value)}
                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Types</p>
-                            {/*<input type="text"*/}
-                            {/*       placeholder="Select Types"*/}
-                            {/*       // value={typeOptions}*/}
-                            {/*       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"*/}
-                            {/*/>*/}
-
-                            {/*<div className="text-[#383E49] flex flex-row justify-between  items-center px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7] " onClick={() => setIsTypeOpen(!isTypeOpen)}>*/}
-                            {/*    <span className="">{selectType.length > 0 ? selectType.join(",") : "Select options"}</span>*/}
-                            {/*    <span>{isTypeOpen ? "▲" : "▼"}</span>*/}
-                            {/*</div>*/}
-
-                            {/*{isTypeOpen && (*/}
                             <div className=" z-10 bg-white border-[1px] rounded ">
                                 <Multiselect
-                                    options={typeOptions.map(type => ({
-                                        name: type,
-                                        id: type
-                                    }))} // Convert array to objects
-                                    selectedValues={selectType.map(type => ({name: type, id: type}))}
-                                    onSelect={(selectedList) => setSelectedType(selectedList.map(item => item.name))}
-                                    onRemove={(selectedList) => setSelectedType(selectedList.map(item => item.name))}
+                                    options={typeOptions.map((type) => ({ name: type, id: type }))}
+                                    selectedValues={formData.selectedTypes.map((type) => ({ name: type, id: type }))}
+                                    onSelect={handleTypeChange}
+                                    onRemove={handleTypeChange}
                                     displayValue="name"
                                     showCheckbox={true}
-                                    closeOnSelect={false} // Keep dropdown open when selecting items
+                                    closeOnSelect={false}
                                     placeholder="Select Types"
                                 />
                             </div>
-                            {/*)}*/}
 
-                            {/*<Dropdown className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]" options={typeOptions} value={typeOptions[0]}*/}
-                            {/*          placeholder="Select an option"/>*/}
 
                         </div>
                     </div>
-                    {selectType.length > 0 && (
+                    {formData.selectedTypes.length > 0 && (
                         <div className="flex flex-col gap-5">
-                            {selectType.map((type) => (
+                            {formData.selectedTypes.map((type) => (
                                 <div key={type} className="flex flex-row w-full justify-between">
                                     {/* Court Input */}
                                     <div className="w-[45%]">
@@ -155,8 +239,8 @@ export default function AddStadiumOverlay(){
                                         <input
                                             type="number"
                                             placeholder={`Enter number of ${type} Courts`}
-                                            value={typeDetails[type]?.court || ""}
-                                            onChange={(e) => handleInputChange(type, "court", e.target.value)}
+                                            value={formData.typeDetails[type]?.court || ""}
+                                            onChange={(e) => handleTypeDetailChange(type, "court", e.target.value)}
                                             className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
                                         />
                                     </div>
@@ -167,8 +251,8 @@ export default function AddStadiumOverlay(){
                                         <input
                                             type="number"
                                             placeholder={`Enter ${type} Cost / Hr`}
-                                            value={typeDetails[type]?.cost || ""}
-                                            onChange={(e) => handleInputChange(type, "cost", e.target.value)}
+                                            value={formData.typeDetails[type]?.cost || ""}
+                                            onChange={(e) => handleTypeDetailChange(type, "cost", e.target.value)}
                                             className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
                                         />
                                     </div>
@@ -177,8 +261,8 @@ export default function AddStadiumOverlay(){
                         </div>
                     )}
                     <div className="flex flex-row gap-3 justify-end">
-                        <button className="border-[1px] px-6 py-2 rounded-lg text-[#667085] border-[#858D9D]">Cancle</button>
-                        <button className="border-[1px] px-6 py-2 rounded-lg bg-[#0F53B3] text-white">Save</button>
+                        <button className="border-[1px] px-6 py-2 rounded-lg text-[#667085] border-[#858D9D]" onClick={handleCancel}>Cancel</button>
+                        <button type="Submit" className="border-[1px] px-6 py-2 rounded-lg bg-[#0F53B3] text-white">Save</button>
                     </div>
                 </form>
             </div>

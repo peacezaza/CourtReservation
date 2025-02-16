@@ -25,6 +25,8 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         typeDetails: {},
     });
 
+    const token = localStorage.getItem("token")
+
     // Handle file upload
     const handleFileChange = (event) => {
         setFiles(Array.from(event.target.files));
@@ -68,9 +70,12 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
 
         // Append text fields
         Object.keys(formData).forEach((key) => {
-            data.append(key, formData[key]);
+            if (key === "selectedTypes" || key === "typeDetails") {
+                data.append(key, JSON.stringify(formData[key])); // Convert arrays & objects to JSON
+            } else {
+                data.append(key, formData[key]);
+            }
         });
-
         // Append files (assuming `files` is an array of File objects)
         files.forEach((file, index) => {
             data.append(`files`, file); // If multiple files, backend should handle array
@@ -79,7 +84,8 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         try {
             const response = await axios.post("http://localhost:3000/addStadium", data, {
                 headers: {
-                    "Content-Type": "multipart/form-data"
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${token}`
                 }
             });
 

@@ -7,6 +7,7 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
 
 
     const typeOptions = ["Badminton", "Soccer", "Football", "Table Tennis"];
+    const facilityOptions = ["Parking", "Bathroom"]
 
     const [files, setFiles] = useState([]);
     const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         addressLink: "",
         openHour: "",
         closeHour: "",
-        facilities: "",
+        selectedFacilities: [],
         selectedTypes: [],
         typeDetails: {},
     });
@@ -53,6 +54,13 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
                 ...prev.typeDetails,
                 [type]: { ...prev.typeDetails[type], [field]: value },
             },
+        }));
+    };
+
+    const handleFacilityChange = (selectedList) => {
+        setFormData((prev) => ({
+            ...prev,
+            selectedFacilities: selectedList.map((item) => item.name), // Store selected facility names
         }));
     };
 
@@ -212,10 +220,21 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
                     <div className="flex flex-row w-full justify-between">
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Facilities</p>
-                            <input type="text" placeholder="Select Facilities"
-                                   value={formData.facilities}
-                                   onChange={(e) => handleInputChange("facilities", e.target.value)}
-                                   className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                            {/*<input type="text" placeholder="Select Facilities"*/}
+                            {/*       value={formData.facilities}*/}
+                            {/*       onChange={(e) => handleInputChange("facilities", e.target.value)}*/}
+                            {/*       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>*/}
+                            <Multiselect
+                                options={facilityOptions.map((facility) => ({ name: facility, id: facility }))} // Format options
+                                selectedValues={formData.selectedFacilities.map((facility) => ({ name: facility, id: facility }))} // Format selected values
+                                onSelect={handleFacilityChange}
+                                onRemove={handleFacilityChange}
+                                displayValue="name"
+                                showCheckbox={true}
+                                closeOnSelect={false}
+                                placeholder="Select Facilities"
+                            />
+
                         </div>
                         <div className="w-[45%]">
                             <p className="font-semibold text-[#383E49]">Types</p>

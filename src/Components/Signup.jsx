@@ -3,15 +3,19 @@ import axios from 'axios';
 import {Link, useNavigate } from "react-router-dom";
 
 import {setCustomIconsLoader} from "@iconify/react";
+// import { v4 as uuidv4 } from 'uuid';
+
 
 export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMatch, setPasswordMatch] = useState(true);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    
 
     const onHandleSubmit = (event) => {
         event.preventDefault();
@@ -21,9 +25,12 @@ export default function Signup() {
             if(password === confirmPassword) {
                 setPasswordMatch(true);
                 axios.post("http://localhost:3000/signup", {
+                    
                     email: email,
                     password: password,
-                    user_type: "owner"
+                    // username: uuidv4(),
+                    user_type: "owner",
+                    point: 0
                 }).then((response) => {
                     console.log(response.data);
                     if(response.data.success){

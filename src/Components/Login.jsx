@@ -1,29 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [type, setType] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        
         axios.post("http://localhost:3000/login", {
             email: email,
             password: password,
         }).then((response) => {
             console.log(response.data);
-            if(response.data.status){
+            if (response.data.status) {
                 console.log("Logged in successfully");
-                navigate("/dashboard");
+                
                 localStorage.setItem("token", response.data.token);
+                setIsLoggedIn(true); 
             }
-        })
+        });
         setEmail("");
         setPassword("");
     }
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            const token = localStorage.getItem("token");
+            if (token) {
+                const decoded = jwtDecode(token);
+                setType(decoded.userData.user_type); 
+            }
+        }
+    }, [isLoggedIn]); 
+
+    useEffect(() => {
+        if (type === "owner") {
+            navigate("/dashboard");
+        } else if (type === "admin") {
+            navigate("/AdminDashboard");
+        }
+    }, [type, navigate]); 
 
     return (
         <div className="flex h-screen">

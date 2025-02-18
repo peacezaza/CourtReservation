@@ -6,7 +6,9 @@ import Login from './Components/Login.jsx'
 import Signup from './Components/Signup.jsx'
 import HomePage from './Components/HomePage.jsx'
 import Dashboard from './Components/Dashboard.jsx'
+import AdminDashboard from './Components/AdminDashboard.jsx'
 import protectedRoute from "./Components/ProtectedRoute.jsx";
+
 
 const router = createBrowserRouter([
     {
@@ -28,7 +30,16 @@ const router = createBrowserRouter([
                 <Dashboard/>
             </protectedRoute>
         ),
+    },
+    {
+        path: "Admindashboard",
+        element: (
+            <protectedRoute>
+                <AdminDashboard/>
+            </protectedRoute>
+        ),
     }
+    
 ]);
 
 

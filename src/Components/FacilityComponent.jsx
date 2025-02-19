@@ -30,7 +30,7 @@ export default function FacilityComponent() {
     return (
         <div className="grid grid-rows-10 h-full">
             <div className="row-span-1">
-                <div className="flex flex-col gap-3 py-1">
+                <div className="flex flex-col gap-3 ">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
                         <div className="flex flex-row space-x-2 items-center">
                             <div>

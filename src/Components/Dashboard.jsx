@@ -18,21 +18,21 @@ export default function Dashboard() {
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+    // useEffect(() => {
+    //     const token = localStorage.getItem("token");
 
-        if(token){
-            const decoded = jwtDecode(token);
-            const currentTime = Date.now() / 1000
-            if(decoded.exp < currentTime){
-                localStorage.removeItem("token");
-                navigate("/login");
-            }
-        }else{
-            navigate("/login");
-        }
+    //     if(token){
+    //         const decoded = jwtDecode(token);
+    //         const currentTime = Date.now() / 1000
+    //         if(decoded.exp < currentTime){
+    //             localStorage.removeItem("token");
+    //             navigate("/login");
+    //         }
+    //     }else{
+    //         navigate("/login");
+    //     }
 
-    })
+    // })
 
 
     const handleNavClick = (event, param) => {

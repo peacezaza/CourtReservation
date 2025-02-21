@@ -1,7 +1,8 @@
 import AddStadiumOverlay from "./AddStadiumOverlay.jsx";
 import StadiumCard from "./StadiumCard.jsx";
 import {Icon} from "@iconify/react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import axios from "axios";
 
 
 
@@ -9,6 +10,33 @@ import {useState} from "react";
 export default function FacilityComponent() {
 
     const [ isOpenOverlay, setIsOpenOverlay ] = useState(false)
+    const [stadiums, setStadiums] = useState([]);
+
+    useEffect(() => {
+        try{
+            const token = localStorage.getItem("token");
+            const response = axios.get("http://localhost:3000/getStadiumInfo", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then((response) => {
+                console.log(response.data);
+                if(response.data.status === true){
+                    const formattedData = response.data.data.map((stadium) => ({
+                        ...stadium,
+                        image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg",
+                        location: stadium.location.split(",")[1] + ", " + stadium.location.split(",")[2]
+
+                    }))
+
+                    setStadiums(formattedData);
+                }
+            })
+        }
+        catch (error){
+            console.log(error)
+        }
+    }, []);
 
 
     const money = 2000;
@@ -27,18 +55,18 @@ export default function FacilityComponent() {
     }
 
 
-
-    const stadiums = [
-        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg", underMaintenance: true },
-    ];
+    //
+    // const stadiums = [
+    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg", underMaintenance: true },
+    // ];
 
     return (
-        <div className="grid grid-rows-10 h-full">
+        <div className="grid grid-rows-10 h-full overflow-y-hidden">
             <div className="row-span-1">
                 <div className="flex flex-col gap-3 ">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
@@ -79,22 +107,17 @@ export default function FacilityComponent() {
                 </div>
             </div>
             <div className="row-span-9 bg-white">
-                <div className="flex justify-center items-center  h-full w-full">
-                    {isOpenOverlay && <AddStadiumOverlay setIsOpenOverlay={setIsOpenOverlay}/>}
-                    <div className="grid grid-cols-3 gap-6 justify-items-center">
+                {isOpenOverlay && <div className="flex justify-center items-center h-full w-full">
+                    <AddStadiumOverlay setIsOpenOverlay={setIsOpenOverlay}/>
+                </div>}
+                <div className="grid grid-rows-8">
+                    <div className=" row-span-7 grid grid-cols-3 gap-7 place-self-center ">
                         {stadiums.map((stadium, index) => (
                             <StadiumCard key={index} {...stadium} />
                         ))}
                     </div>
+                    <div className="row-span-1 bg-blue-400 place-self-center flex items-center justify-center">1 2 3 4</div>
                 </div>
-                {/*<div className="flex justify-center items-center  h-full w-full">*/}
-                {/*    {isOpenOverlay && <AddStadiumOverlay setIsOpenOverlay={setIsOpenOverlay}/>}*/}
-                {/*    <div className="grid grid-cols-3 gap-6 justify-items-center">*/}
-                {/*        {stadiums.map((stadium, index) => (*/}
-                {/*            <StadiumCard key={index} {...stadium} />*/}
-                {/*        ))}*/}
-                {/*    </div>*/}
-                {/*</div>*/}
             </div>
         </div>
     )

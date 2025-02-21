@@ -1,5 +1,5 @@
 import AddStadiumOverlay from "./AddStadiumOverlay.jsx";
-
+import StadiumCard from "./StadiumCard.jsx";
 import {Icon} from "@iconify/react";
 import {useState} from "react";
 
@@ -26,6 +26,16 @@ export default function FacilityComponent() {
         setIsOpenOverlay(true)
     }
 
+
+
+    const stadiums = [
+        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
+        { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg", underMaintenance: true },
+    ];
 
     return (
         <div className="grid grid-rows-10 h-full">
@@ -71,7 +81,20 @@ export default function FacilityComponent() {
             <div className="row-span-9 bg-white">
                 <div className="flex justify-center items-center  h-full w-full">
                     {isOpenOverlay && <AddStadiumOverlay setIsOpenOverlay={setIsOpenOverlay}/>}
+                    <div className="grid grid-cols-3 gap-6 justify-items-center">
+                        {stadiums.map((stadium, index) => (
+                            <StadiumCard key={index} {...stadium} />
+                        ))}
+                    </div>
                 </div>
+                {/*<div className="flex justify-center items-center  h-full w-full">*/}
+                {/*    {isOpenOverlay && <AddStadiumOverlay setIsOpenOverlay={setIsOpenOverlay}/>}*/}
+                {/*    <div className="grid grid-cols-3 gap-6 justify-items-center">*/}
+                {/*        {stadiums.map((stadium, index) => (*/}
+                {/*            <StadiumCard key={index} {...stadium} />*/}
+                {/*        ))}*/}
+                {/*    </div>*/}
+                {/*</div>*/}
             </div>
         </div>
     )

@@ -23,7 +23,8 @@ export default function Signup() {
                 axios.post("http://localhost:3000/signup", {
                     email: email,
                     password: password,
-                    user_type: "owner"
+                    user_type: "owner",
+                    points: 10
                 }).then((response) => {
                     console.log(response.data);
                     if(response.data.success){

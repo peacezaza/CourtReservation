@@ -1,14 +1,16 @@
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {Icon} from '@iconify/react';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import Chart from 'react-apexcharts'
+import { jwtDecode } from "jwt-decode";
 
 
 export default function DashboardComponent() {
+    const [ point, setPoint ] = useState(0)
 
-    const money = 2000;
     let date = new Date();
+    let money
 
     const formettedDate = new Intl.DateTimeFormat('en-US', {
         weekday: 'long',
@@ -18,8 +20,12 @@ export default function DashboardComponent() {
     }).format(date)
 
     useEffect(() => {
-
-    })
+        const token = localStorage.getItem("token")
+        if(token){
+            const decoded = jwtDecode(token);
+            setPoint(decoded.userData.point)
+        }
+    }, [])
 
     const dataOptions = ["Weekly", "Monthly", "Yearly"];
     const defaultDataOption = dataOptions[0];
@@ -89,14 +95,14 @@ export default function DashboardComponent() {
     return (
         <div className="grid grid-rows-10 h-full overflow-x-auto">
             <div className="bg-white row-span-1 ">
-                <div className="flex flex-col gap-3 py-1">
+                <div className="flex flex-col gap-3">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
                         <div className="flex flex-row space-x-2 items-center">
                             <div>
                                 <Icon icon="noto:coin" className="w-9 h-9"/>
                             </div>
 
-                            <div>{money}</div>
+                            <div>{point}</div>
                         </div>
                         <div>
                             <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
@@ -145,7 +151,7 @@ export default function DashboardComponent() {
                             </div>
                             <div className="flex flex-row gap-3 items-start">
                                 <Icon icon="noto:coin" className="w-9 h-9"/>
-                                <p className="font-semibold text-2xl">2000</p>
+                                <p className="font-semibold text-2xl">{point}</p>
                             </div>
                         </div>
 

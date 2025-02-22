@@ -65,6 +65,7 @@ const SearchableTable = () => {
     };
 
     const closeModal = () => {
+        setCustomLink("");
         setSelectedItem(null);
     };
 
@@ -85,21 +86,25 @@ const SearchableTable = () => {
             // เรียก API แลกเปลี่ยน Voucher
             const response = await axios.post("http://localhost:3000/redeem_voucher", {
                 voucher: customLink,
-                phone: "0894042414",
+                phone: "0829532247",
             });
 
             if (response.data.success) {
                 const amount = response.data.amount; // ดึงจำนวนเงินที่ได้รับ
                 const user_id = selectedItem.user_id;
+                
 
-                // ส่ง Notification พร้อมจำนวนเงิน
+                
                 await axios.post("http://localhost:3000/notifications", {
                     user_id,
                     notification: `You have received ${amount} THB for the exchange transaction. Thank you very much for using our service.`,
                 });
 
                 alert("Voucher redeemed successfully!");
-                setCustomLink("");
+                await axios.delete("http://localhost:3000/delete_exchange_point", {
+                    data: { user_id } 
+                });
+                
                 closeModal();
             } else {
                 alert(`Failed: ${response.data.message}`);

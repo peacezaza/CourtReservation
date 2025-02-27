@@ -1,10 +1,10 @@
-import { useState } from "react";
-import DateTimeDisplay from "./Time";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from '@iconify/react';
+import { jwtDecode } from "jwt-decode";
 
 export default function BookingComponent() {
-
+  const [point, setPoint] = useState(0);
   const [activeTab, setActiveTab] = useState("Booking");
   const [statusFilter, setStatusFilter] = useState("Ongoing");
   const [filter, setFilter] = useState("All");
@@ -20,6 +20,13 @@ export default function BookingComponent() {
   const navigate = useNavigate();
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = jwtDecode(token);
+      setPoint(decoded.userData.point);
+    }
+  }, []);
   const bookings = [
     { id: "#7010", name: "John Doe", contact: "(081) 234-5678", stadium: "Bangkok Arena", facility: "Badminton", status: "Confirmed", amount: 150 },
     { id: "#7021", name: "Jane Smith", contact: "(082) 345-6789", stadium: "Bangkok Arena", facility: "Football", status: "Cancelled", amount: 200 },
@@ -45,6 +52,13 @@ export default function BookingComponent() {
     { id: "#7112", name: "Charlotte Young", contact: "(009) 345-6789", stadium: "Sriracha Arena", facility: "Basketball", status: "Confirmed", amount: 450 },
     { id: "#7113", name: "James Hall", contact: "(008) 456-7890", stadium: "Bangkok Arena", facility: "Football", status: "Cancelled", amount: 500 }
   ];
+  let date = new Date();
+  const formettedDate = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date)
 
   const filteredBookings = bookings.filter((booking) => {
     if (statusFilter === "Ongoing" && booking.status === "Completed") return false;
@@ -68,7 +82,6 @@ export default function BookingComponent() {
   const endIndex = startIndex + postPerPage;
   const bookingsToDisplay = filteredBookings.slice(startIndex, endIndex);
 
-
   const handleOpenPopup = () => {
     setShowPopup(true);
   };
@@ -76,34 +89,48 @@ export default function BookingComponent() {
   const handleClosePopup = () => {
     setShowPopup(false);
   };
+
   return (
     <div className="flex flex-row h-screen">
-
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-white">
-
+      <div className="flex-1 p-6 bg-white mt-0 pt-0">
         {/* Accout , Notification , Coin */}
-        <div className="flex justify-end space-x-8 pb-2">
-          <div className="flex item-center space-x-2">
-            <img src="/diamon.png" alt="Coin" className="w-8 h-8" />
-            <span><p class="font-semibold">2,000</p></span>
+        <div className="flex justify-end space-x-8">
+          {/* Coin */}
+          <div className="flex items-center space-x-2">
+            <Icon icon="noto:coin" className="w-9 h-9" />
+            <span className="font-semibold">{point}</span>
           </div>
-          <div>
-            <img src="/notification.png" alt="Notification" className="w-8 h-8" />
-          </div>
-          <div>
-            <img src="/user.png" alt="Account" className="w-8 h-8" />
-          </div>
-        </div>
-        <div className="flex justify-between items-center mb-4">
-          <div className="mx-auto">
-            <DateTimeDisplay />
-          </div>
-          <button onClick={handleOpenPopup} className="bg-[#0F53B3] text-white px-4 py-2 rounded">
-            Create Booking
-          </button>
-        </div>
 
+          {/* Notification */}
+          <div>
+            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+              viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" />
+            </svg>
+          </div>
+
+          {/* User Account */}
+          <div>
+            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+              viewBox="0 0 24 24">
+              <path fill-rule="evenodd"
+                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <div className="flex flex-row items-center justify-between pt-2">
+          <div></div>
+          <div>{formettedDate.toString()}</div>
+          <div className="">
+            <button onClick={handleOpenPopup} className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4 ">Create Booking
+            </button>
+          </div>
+        </div>
         {showPopup && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
@@ -162,7 +189,7 @@ export default function BookingComponent() {
           </div>
         )}
 
-        <div className="flex justify-between items-center w-full pb-4">
+        <div className="flex justify-between items-center w-full pb-4 pt-2">
           {/* ปุ่ม Ongoing / Completed */}
           <div className="flex gap-4">
             {["Ongoing", "Completed"].map((status) => (
@@ -255,7 +282,6 @@ export default function BookingComponent() {
             </tbody>
           </table>
         </div>
-
         <div className="flex justify-between items-center w-full mt-4">
 
           {/* Previous Page Button */}

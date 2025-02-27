@@ -240,7 +240,7 @@ export default function BookingComponent() {
                 <th className="p-2 text-left">Facility</th>
                 <th className="p-2 text-left">Status</th>
                 <th className="p-2 text-left">Amount</th>
-                <th className="p-2 text-left">Actions</th>
+                <th className="p-2 text-left"></th>
               </tr>
             </thead>
             <tbody>
@@ -353,7 +353,7 @@ export default function BookingComponent() {
                 <strong>Facility Type:</strong> <span>{selectedBooking.facility}</span>
               </div>
               <div className="flex justify-between">
-                <strong>Amount:</strong> <span>{selectedBooking.amount}</span>
+                <strong>Amount:</strong> <span>${selectedBooking.amount}</span>
               </div>
               <div className="flex justify-between">
                 <strong>Status:</strong> <span>{selectedBooking.status}</span>

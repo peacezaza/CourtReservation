@@ -24,7 +24,14 @@ export default function Login() {
                 localStorage.setItem("token", response.data.token);
                 setIsLoggedIn(true);
             }
-        });
+        }).catch((error) => {
+        if (error.response) {
+            // setErrorMessage(error.response.data.message);
+            console.log(error.response);
+        } else {
+            // setErrorMessage("An unexpected error occurred. Please try again.");
+        }
+    });
         setEmail("");
         setPassword("");
     }

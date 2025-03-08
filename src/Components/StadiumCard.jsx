@@ -3,17 +3,20 @@ import { useState, useEffect, useRef } from "react";
 import StadiumDetailsModal from "./StadiumDetailsModal";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
+import axios from "axios";
 
-export default function StadiumCard({ name, location, rating, pictures, underMaintenance, setIsFacility, setStadiumSelect}) {
+export default function StadiumCard({id, name, location, rating, pictures, availability, setIsFacility, setStadiumSelect}) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isUnderMaintenance, setIsUnderMaintenance] = useState(underMaintenance);
+    const [isUnderMaintenance, setIsUnderMaintenance] = useState(!availability);
     const menuRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const stadium = { name, location, rating, pictures, underMaintenance: isUnderMaintenance };
+    const stadium = { id, name, location, rating, pictures, availability: isUnderMaintenance };
 
     // ปิดเมนูเมื่อคลิกข้างนอก
     useEffect(() => {
-        console.log(stadium.pictures[0]);
+        // console.log(stadium.pictures[0]);
+        console.log("isUnderMaintenance",isUnderMaintenance)
+        console.log("availability", availability)
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setMenuOpen(false);
@@ -33,9 +36,27 @@ export default function StadiumCard({ name, location, rating, pictures, underMai
         console.log("Click")
     }
 
-    const toggleMaintenance = () => {
-        setIsUnderMaintenance((prev) => !prev); // สลับสถานะ
+    const toggleMaintenance = (id) => {
+        setIsUnderMaintenance((prev) => {
+            const updatedStatus = !prev; // Get the new toggled value
+            console.log(!updatedStatus);  // Log the correct value
+
+            const data = {
+                stadium_id: id,
+                status: !updatedStatus, // Use the correct toggled value
+            };
+
+            const token = localStorage.getItem("token");
+            axios.put("http://localhost:3000/updateStadiumStatus", data, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then((response) => {
+                console.log(response);
+            });
+
+            return updatedStatus; // Update the state
+        });
     };
+
 
     return (
         <div className="relative rounded-2xl shadow-lg overflow-hidden w-80 cursor-pointer">
@@ -48,8 +69,7 @@ export default function StadiumCard({ name, location, rating, pictures, underMai
                 )}
             </div>
 
-            <div className="p-4"
-                 onClick={handleClick}>
+            <div className="p-4" onClick={handleClick}>
                 <p className="text-gray-500 text-sm">Entire Stadium · 4 courts</p>
                 <h3 className="font-semibold text-lg">{name}</h3>
                 <div className="flex items-center text-gray-500 text-sm mt-1">
@@ -58,7 +78,7 @@ export default function StadiumCard({ name, location, rating, pictures, underMai
                 </div>
                 <div className="flex items-center mt-2">
                     <Icon icon="mdi:star" className="w-5 h-5 text-yellow-500"/>
-                    <span className={`ml-1 ${underMaintenance ? "text-red-500" : ""}`}>{rating}</span>
+                    <span className={`ml-1 ${availability ? "text-red-500" : ""}`}>{rating}</span>
                     <span className="text-gray-400 ml-1">(122)</span>
                 </div>
             </div>
@@ -86,16 +106,16 @@ export default function StadiumCard({ name, location, rating, pictures, underMai
                                 <Menu.Item>
                                     {({ active }) => (
                                         <button
-                                            className={`block w-full text-left px-4 py-2 text-sm ${active ? "bg-yellow-100 text-yellow-700" : "text-yellow-700"
-                                            }`}
-                                            onClick={toggleMaintenance}
-                                        >   {/* เปลี่ยนค่าสถานะของสนาม */}
+                                            className={`block w-full text-left px-4 py-2 text-sm ${active ? "bg-yellow-100 text-yellow-700" : "text-yellow-700"}`}
+                                            onClick={() => toggleMaintenance(stadium.id)}  // Call the function with the stadium.id when clicked
+                                        >
                                             {isUnderMaintenance ? "Available" : "Set Maintenance"}
                                         </button>
+
                                     )}
                                 </Menu.Item>
                                 <Menu.Item>
-                                    {({ active }) => (
+                                    {({active}) => (
                                         <button
                                             className={`block w-full text-left px-4 py-2 text-sm ${active ? "bg-orange-100 text-orange-600" : "text-orange-600"
                                             }`}

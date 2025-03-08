@@ -1,16 +1,21 @@
-import {useEffect, useState} from "react";
-import {Icon} from '@iconify/react';
+import { useEffect, useState } from "react";
+import { Icon } from '@iconify/react';
 import Dropdown from 'react-dropdown';
+import { useNavigate } from 'react-router-dom';
 import 'react-dropdown/style.css';
 import Chart from 'react-apexcharts'
-import { jwtDecode } from "jwt-decode";
-
+import ReviewComponent from "./ReviewComponent.jsx";
+import UserAccountComponent from "./UserAccountComponent.jsx"
+import NotificationComponent from "./NotificationComponent.jsx";
 
 export default function DashboardComponent() {
-    const [ point, setPoint ] = useState(0)
 
+    const money = 2000;
     let date = new Date();
-    let money
+    const navigate = useNavigate();
+
+
+    const [isOpenMenuAccount, setIsOpenMenuAccount] = useState(false);
 
     const formettedDate = new Intl.DateTimeFormat('en-US', {
         weekday: 'long',
@@ -19,16 +24,29 @@ export default function DashboardComponent() {
         year: "numeric",
     }).format(date)
 
+    const [OpenReview, setOpenReview] = useState(null);
+    const [OpenUserAccount, setOpenUserAccount] = useState(null);
+    const [OpenNotification, setOpenNotification] = useState(null);
+
+    const handleOpenReview = () => {
+        setOpenReview(prev => !prev); // Trigger state change on button click
+    }
+
+    const handleOpenNotification = () => {
+        setOpenNotification(prev => !prev); // Trigger state change on button click
+    }
+
+    const handleOpenUserAccount = () => {
+        setOpenUserAccount(prev => !prev); // Trigger state change on button click
+    }
+
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if(token){
-            const decoded = jwtDecode(token);
-            setPoint(decoded.userData.point)
-        }
-    }, [])
+
+    })
 
     const dataOptions = ["Weekly", "Monthly", "Yearly"];
     const defaultDataOption = dataOptions[0];
+
 
     const locationDetails = [{
         "Location": "Downtown Arena",
@@ -76,21 +94,28 @@ export default function DashboardComponent() {
 
     const review = [
         {
-            "Name" : "Mark",
-            "Review" : "Food could be better",
-            "Stadium" : "Areana"
+            "Name": "Mark",
+            "Review": "Food could be better",
+            "Stadium": "Areana"
         },
         {
-            "Name" : "Christian",
-            "Review" : "Facilities are not enough for amount paid.",
-            "Stadium" : "Ryummit"
+            "Name": "Christian",
+            "Review": "Facilities are not enough for amount paid.",
+            "Stadium": "Ryummit"
         },
         {
-            "Name" : "Alexander",
-            "Review" : "Good.",
-            "Stadium" : "Areana"
+            "Name": "Alexander",
+            "Review": "Good.",
+            "Stadium": "Areana"
         }
     ]
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        console.log("Logout");
+        navigate("/")
+
+    }
 
     return (
         <div className="grid grid-rows-10 h-full overflow-x-auto">
@@ -99,29 +124,72 @@ export default function DashboardComponent() {
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
                         <div className="flex flex-row space-x-2 items-center">
                             <div>
-                                <Icon icon="noto:coin" className="w-9 h-9"/>
+                                <Icon icon="noto:coin" className="w-9 h-9" />
                             </div>
 
-                            <div>{point}</div>
+                            <div>{money}</div>
                         </div>
                         <div>
-                            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                      d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z"/>
-                            </svg>
+                            <button onClick={() => handleOpenNotification(null)}
+                                    className="p-1 rounded-full  hover:bg-gray-300 "
+                            >
+
+                                <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
+                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black"
+                                     viewBox="0 0 24 24">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                          d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" />
+                                </svg>
+                            </button>
                         </div>
 
-                        <div>
-                            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                                 viewBox="0 0 24 24">
-                                <path fill-rule="evenodd"
-                                      d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
-                                      clip-rule="evenodd"/>
-                            </svg>
+                        {/* MenuUser */}
+                        <div className="relative" >
+                            <button
+                                onClick={() => setIsOpenMenuAccount(!isOpenMenuAccount)}
+                                className="p-2 rounded-full  hover:bg-gray-300 "
+                            >
+                                <svg
+                                    className="w-8 h-8 text-gray-800 dark:text-white"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="black"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
+                            {isOpenMenuAccount && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                    <div className="px-4 py-2 flex items-center space-x-2">
+                                        <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" />
+                                        </svg>
+                                        <span className="font-semibold">Tanapat</span>
+                                    </div>
+                                    <hr />
+                                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2" onClick={() => handleOpenUserAccount(null)}>
+                                        <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" />
+                                        </svg>
+                                        <span>My Account</span>
+                                    </button>
+                                    <hr />
+                                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2" onClick={handleLogout}>
+                                        <Icon icon="material-symbols:logout" className="w-5 h-5 text-gray-600" />
+                                        <span>Logout</span>
+                                    </button>
+
+                                </div>
+                            )}
                         </div>
+
                     </div>
                     <div className="flex flex-row items-center justify-between">
                         <div></div>
@@ -140,7 +208,7 @@ export default function DashboardComponent() {
                         <div className="font-semibold text-3xl">Overview</div>
                         <div className="">
                             <Dropdown className="border-2 " options={dataOptions} value={defaultDataOption}
-                                      placeholder="Select an option"/>
+                                      placeholder="Select an option" />
                         </div>
                     </div>
                     <div className="row-span-1 w-full h-[50%] rounded-b-xl flex flex-row justify-around">
@@ -150,8 +218,8 @@ export default function DashboardComponent() {
                                 <p className="text-[#5D6679]">Revenue</p>
                             </div>
                             <div className="flex flex-row gap-3 items-start">
-                                <Icon icon="noto:coin" className="w-9 h-9"/>
-                                <p className="font-semibold text-2xl">{point}</p>
+                                <Icon icon="noto:coin" className="w-9 h-9" />
+                                <p className="font-semibold text-2xl">2000</p>
                             </div>
                         </div>
 
@@ -196,12 +264,12 @@ export default function DashboardComponent() {
                     <div className="w-full h-full overflow-y-auto overflow-x-auto ">
                         <table className="w-full table-auto">
                             <thead className="border-b-2 sticky top-0 z-10 bg-white">
-                            {tableHeader.map((key,index) =>(
+                            {tableHeader.map((key, index) => (
                                 <th className="text-[#9CA3AF] text-3xl py-3 px-5" key={index}>{key}</th>
                             ))}
                             </thead>
                             <tbody className="text-center text-xl">
-                            {locationDetails.map((row, rowIndex) =>(
+                            {locationDetails.map((row, rowIndex) => (
                                 <tr className="h-[5rem] hover:bg-gray-200" key={rowIndex}>{Object.keys(row).map((key, index) => (
                                     <td key={index}>{row[key]}</td>
                                 ))}</tr>
@@ -218,7 +286,10 @@ export default function DashboardComponent() {
                     <div className="col-span-2 bg-white rounded-xl flex-col">
                         <div className="text-xl flex items-center px-4 flex-row justify-between py-3">
                             <div>Customers feedback</div>
-                            <button><Icon icon="ph:dots-three-vertical-bold" /></button>
+                            <button onClick={() => handleOpenReview(null)}>
+                                <Icon icon="ph:dots-three-vertical-bold" />
+                            </button>
+
                         </div>
                         <div>
                             {review.map((row, rowIndex) => (
@@ -230,6 +301,9 @@ export default function DashboardComponent() {
                         </div>
                     </div>
                 </div>
+                {OpenReview && <ReviewComponent onClose={() => setOpenReview(null)} />}
+                {OpenNotification && <NotificationComponent onClose={() => setOpenNotification(null)} />}
+                {OpenUserAccount && <UserAccountComponent onClose={() => setOpenUserAccount(null)} />}
             </div>
         </div>
     )

@@ -13,6 +13,12 @@ export default function BookingComponent() {
     const itemsPerPage = 10; // แสดง 10 รายการต่อหน้า
     const [selectedBooking, setSelectedBooking] = useState(null);
 
+    const [isCancelOverlayOpen, setIsCancelOverlayOpen] = useState(false);
+    const [bookingToCancel, setBookingToCancel] = useState(null);
+
+
+
+
 
     const reservationsData = [
         { id: "6742", name: "Chris", contact: "(123) 456-395", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "1", date: "2025-01-05", time: "10.00 AM - 12.00 PM" },
@@ -37,7 +43,44 @@ export default function BookingComponent() {
         { id: "6836", name: "Pegasus", contact: "(123) 456-566", stadium: "Sriracha Arena", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "20", date: "2025-01-24", time: "12.00 PM - 2.00 PM" }
     ];
 
+    const [reservations, setReservations] = useState([]);
+    useEffect(() => {
+        setReservations(reservationsData);
+    }, []);
 
+
+    // ฟังก์ชันยกเลิกการจอง
+    const handleCancelBooking = (bookingId) => {
+        setReservations(prevReservations =>
+            prevReservations.map(res =>
+                res.id === bookingId ? { ...res, status: "Cancelled" } : res
+            )
+        );
+        setSelectedBooking(null); // Close popup
+    };
+    const handleCancelOverlayClose = () => {
+        setIsCancelOverlayOpen(false);
+        setBookingToCancel(null);
+    };
+
+    // Function to open cancel confirmation overlay
+    const openCancelOverlay = (booking) => {
+        setBookingToCancel(booking);
+        setIsCancelOverlayOpen(true);
+    };
+
+    // Function to confirm cancellation
+    const handleConfirmCancel = () => {
+        if (bookingToCancel) {
+            setReservations(prev =>
+                prev.map(res =>
+                    res.id === bookingToCancel.id ? { ...res, status: "Cancelled" } : res
+                )
+            );
+            setIsCancelOverlayOpen(false);
+            setBookingToCancel(null);
+        }
+    };
 
     const matchesStatus =
         filterStatus === "All" ||
@@ -45,11 +88,12 @@ export default function BookingComponent() {
         (filterStatus === "Completed" && res.status === "Cancelled");
 
 
-    const filteredReservations = reservationsData.filter(res => {
+    const filteredReservations = reservations.filter(res => {
         const matchesStatus = filterStatus === "All" || res.status === filterStatus;
         const matchesSearch = res.name.toLowerCase().includes(searchTerm.toLowerCase()) || res.id.includes(searchTerm);
         return matchesStatus && matchesSearch;
     });
+
 
     useEffect(() => {
         setCurrentPage(1);
@@ -194,10 +238,19 @@ export default function BookingComponent() {
                                 <td className="px-4 py-5">{res.facility}</td>
                                 <td className={`px-4 py-5 ${res.status === 'Cancelled' ? 'text-red-500' : 'text-green-500'}`}>{res.status}</td>
                                 <td className="px-4 py-5">{res.amount}</td>
-                                <td className="px-4 py-5 text-grey-100 cursor-pointer relative">
-                                    <button onClick={() => handleSelectBooking(res)} className="ml-2">
-                                        <Icon icon="mdi:dots-vertical" className="w-5 h-5" />
-                                    </button>
+                                <td className="px-4 py-5 text-grey-100 cursor-pointer relative flex items-center space-x-3">
+                                    <div className="flex items-center w-15 justify-between">
+                                        {res.status === 'Confirmed' ? (
+                                            <button onClick={() => openCancelOverlay(res)}>
+                                                <Icon icon="mdi:trash-can-outline" className="w-5 h-5 text-red-500 cursor-pointer" />
+                                            </button>
+                                        ) : (
+                                            <span className="w-5 h-5"></span> // Placeholder to maintain spacing
+                                        )}
+                                        <button onClick={() => handleSelectBooking(res)} className="ml-2">
+                                            <Icon icon="mdi:dots-vertical" className="w-5 h-5" />
+                                        </button>
+                                    </div>
 
                                 </td>
                             </tr>
@@ -240,7 +293,31 @@ export default function BookingComponent() {
 
                 {isOpenOverlay && <CreateBookingOverlay setIsOpenOverlay={setIsOpenOverlay} />}
                 {selectedBooking && <BookingDetail booking={selectedBooking} onClose={() => setSelectedBooking(null)} />}
+                {selectedBooking && (
+                    <BookingDetail
+                        booking={selectedBooking}
+                        onClose={() => setSelectedBooking(null)}
+                        onCancel={handleCancelBooking}
+                    />
+                )}
             </div>
+            {/* Cancel Confirmation Overlay */}
+            {isCancelOverlayOpen && bookingToCancel && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-4">Confirm Cancellation</h2>
+                        <p>Are you sure you want to cancel booking #{bookingToCancel.id}?</p>
+                        <div className="mt-4 flex justify-end space-x-4">
+                            <button onClick={handleCancelOverlayClose} className="px-4 py-2 rounded bg-gray-300">
+                                Cancel
+                            </button>
+                            <button onClick={handleConfirmCancel} className="px-4 py-2 rounded bg-red-500 text-white">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

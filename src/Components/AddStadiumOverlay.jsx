@@ -1,13 +1,11 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Multiselect from "multiselect-react-dropdown";
-import axios from 'axios';
+import Select from "react-select";
+import axios from "axios";
 
-
-export default function AddStadiumOverlay({setIsOpenOverlay}){
-
-
+export default function AddStadiumOverlay({ setIsOpenOverlay }) {
     const typeOptions = ["Badminton", "Soccer", "Football", "Table Tennis"];
-    const facilityOptions = ["Parking", "Bathroom"]
+    const facilityOptions = ["Parking", "Bathroom"];
 
     const [files, setFiles] = useState([]);
     const [formData, setFormData] = useState({
@@ -19,14 +17,15 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         subDistrict: "",
         zipCode: "",
         addressLink: "",
-        openHour: "",
-        closeHour: "",
+        openHour: null,
+        closeHour: null,
         selectedFacilities: [],
         selectedTypes: [],
         typeDetails: {},
     });
 
-    const token = localStorage.getItem("token")
+
+    const token = localStorage.getItem("token");
 
     // Handle file upload
     const handleFileChange = (event) => {
@@ -38,7 +37,7 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         setFormData({ ...formData, [field]: value });
     };
 
-    // Handle multi-select dropdown
+    // Handle multi-select dropdown for types
     const handleTypeChange = (selectedList) => {
         setFormData((prev) => ({
             ...prev,
@@ -46,7 +45,7 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         }));
     };
 
-    // Handle court & cost input changes
+    // Handle court & cost input changes for each selected type
     const handleTypeDetailChange = (type, field, value) => {
         setFormData((prev) => ({
             ...prev,
@@ -57,10 +56,11 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         }));
     };
 
+    // Handle multi-select dropdown for facilities
     const handleFacilityChange = (selectedList) => {
         setFormData((prev) => ({
             ...prev,
-            selectedFacilities: selectedList.map((item) => item.name), // Store selected facility names
+            selectedFacilities: selectedList.map((item) => item.name),
         }));
     };
 
@@ -74,27 +74,35 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         } else {
             console.log("No files selected.");
         }
+
         const data = new FormData();
 
         // Append text fields
         Object.keys(formData).forEach((key) => {
             if (key === "selectedTypes" || key === "typeDetails") {
                 data.append(key, JSON.stringify(formData[key])); // Convert arrays & objects to JSON
+            } else if (key === "openHour" && formData[key]?.value) {
+                // Append only the value of openHour as a string
+                data.append(key, formData[key].value);
+            } else if (key === "closeHour" && formData[key]?.value) {
+                // Append only the value of closeHour as a string
+                data.append(key, formData[key].value);
             } else {
-                data.append(key, formData[key]);
+                data.append(key, formData[key]); // For other fields, append as is
             }
         });
+
         // Append files (assuming `files` is an array of File objects)
-        files.forEach((file, index) => {
-            data.append(`files`, file); // If multiple files, backend should handle array
+        files.forEach((file) => {
+            data.append("files", file); // If multiple files, backend should handle array
         });
 
         try {
             const response = await axios.post("http://localhost:3000/addStadium", data, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    "Authorization": `Bearer ${token}`
-                }
+                    "Authorization": `Bearer ${token}`,
+                },
             });
 
             console.log("Upload Successful:", response.data);
@@ -107,7 +115,7 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
         e.preventDefault();
         setIsOpenOverlay(false);
         resetForm();
-    }
+    };
 
     const resetForm = () => {
         setFormData({
@@ -117,123 +125,209 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
             subDistrict: "",
             zipCode: "",
             addressLink: "",
-            photo: null, // Reset photo
+            selectedFacilities: [],
+            selectedTypes: [],
+            typeDetails: {},
         });
         setFiles([]); // Clear files state
     };
 
+    const hours = Array.from({ length: 24 }, (_, index) => {
+        const hour = index.toString().padStart(2, "0") + ":00:00";
+        return { value: hour, label: hour };
+    });
 
+    const handleHourChange = (field, value) => {
+
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+            ...(field === "openHour" ? { closeHour: null } : {}),
+        }));
+    };
+
+    const getFilteredCloseHours = () => {
+        if (!formData.openHour) return hours;
+        return hours.filter((hour) => hour.value > formData.openHour.value);
+    };
+
+    const handleRemoveImage = (index) => {
+        const updatedFiles = [...files];
+        updatedFiles.splice(index, 1); // Remove the image at the specified index
+        setFiles(updatedFiles); // Update the state
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div
-                className="bg-white w-full max-w-2xl h-fit max-h-screen rounded-xl px-3 py-3 border-[1px] border-black overflow-auto z-50">
+            <div className="bg-white w-full max-w-2xl min-h-[80vh] h-fit max-h-screen rounded-xl px-3 py-3 border-[1px] border-black overflow-auto z-50">
                 <div>
                     <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-                        <div className="flex flex-row justify-start items-center space-x-3 ">
-                            <div className="w-14 h-14 bg-[#D0D3D9] rounded-full"></div>
+                        <div className="flex flex-row justify-start items-center space-x-3">
+                            {files.length === 0 ? (
+                                // Show the "Add Images" option if no images are selected
+                                <div className="w-14 h-14 bg-[#D0D3D9] rounded-full flex justify-center items-center">
+                                    <span className="text-[#383E49]">+</span>
+                                </div>
+                            ) : (
+                                // Show thumbnails of the selected images
+                                files.map((file, index) => (
+                                    <div
+                                        key={index}
+                                        className="relative w-14 h-14 bg-[#D0D3D9] rounded-full flex justify-center items-center overflow-hidden"
+                                    >
+                                        <img
+                                            src={URL.createObjectURL(file)} // Convert file to image URL
+                                            alt={`Selected Image ${index}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveImage(index)}
+                                            className="absolute top-0 right-0 bg-white rounded-full p-1 text-xs text-red-600"
+                                        >
+                                            X
+                                        </button>
+                                    </div>
+                                ))
+                            )}
                             <div>
                                 <label className="cursor-pointer text-[#383E49]">
                                     {files.length === 0 ? "Add Images" : `${files.length} Images Selected`}
-                                    <input type="file" accept="image/*" multiple onChange={handleFileChange}
-                                           className="hidden"/>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
                                 </label>
                             </div>
                         </div>
+
                         <div className="flex flex-row w-full justify-between">
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Stadium</p>
-                                <input type="text" placeholder="Enter Stadium Name" value={formData.stadium}
-                                       onChange={(e) => handleInputChange("stadium", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Stadium Name"
+                                    value={formData.stadium}
+                                    onChange={(e) => handleInputChange("stadium", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Phone Number</p>
-                                <input type="text" placeholder="Enter phone number" value={formData.phone}
-                                       onChange={(e) => handleInputChange("phone", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Enter phone number"
+                                    value={formData.phone}
+                                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                         </div>
+
                         <div className="flex flex-row w-full justify-between">
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Country</p>
-                                <input type="text" placeholder="Select Country"
-                                       value={formData.country}
-                                       onChange={(e) => handleInputChange("country", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Select Country"
+                                    value={formData.country}
+                                    onChange={(e) => handleInputChange("country", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Province</p>
-                                <input type="text" placeholder="Select Province"
-                                       value={formData.province}
-                                       onChange={(e) => handleInputChange("province", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Select Province"
+                                    value={formData.province}
+                                    onChange={(e) => handleInputChange("province", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                         </div>
+
                         <div className="flex flex-row w-full justify-between">
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">District</p>
-                                <input type="text" placeholder="Select District"
-                                       value={formData.district}
-                                       onChange={(e) => handleInputChange("district", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Select District"
+                                    value={formData.district}
+                                    onChange={(e) => handleInputChange("district", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Sub-District</p>
-                                <input type="text" placeholder="Select Sub-District"
-                                       value={formData.subDistrict}
-                                       onChange={(e) => handleInputChange("subDistrict", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Select Sub-District"
+                                    value={formData.subDistrict}
+                                    onChange={(e) => handleInputChange("subDistrict", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                         </div>
+
                         <div className="flex flex-row w-full justify-between">
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Zip Code</p>
-                                <input type="text" placeholder="Select Zip Code"
-                                       value={formData.zipCode}
-                                       onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Select Zip Code"
+                                    value={formData.zipCode}
+                                    onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Address Link</p>
-                                <input type="text" placeholder="Enter Address Link"
-                                       value={formData.addressLink}
-                                       onChange={(e) => handleInputChange("addressLink", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Address Link"
+                                    value={formData.addressLink}
+                                    onChange={(e) => handleInputChange("addressLink", e.target.value)}
+                                    className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                />
                             </div>
                         </div>
+
                         <div className="flex flex-row w-full justify-between">
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Open Hour</p>
-                                <input type="text" placeholder="Select Open Hour"
-                                       value={formData.openHour}
-                                       onChange={(e) => handleInputChange("openHour", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <Select
+                                    options={hours}
+                                    value={formData.openHour}
+                                    onChange={(value) => handleHourChange("openHour", value)}
+                                    menuPlacement="auto" // Ensures the dropdown is positioned correctly
+                                />
                             </div>
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Close Hour</p>
-                                <input type="text" placeholder="Select Close Hour"
-                                       value={formData.closeHour}
-                                       onChange={(e) => handleInputChange("closeHour", e.target.value)}
-                                       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>
+                                <Select
+                                    options={getFilteredCloseHours()}
+                                    value={formData.closeHour}
+                                    onChange={(value) => handleHourChange("closeHour", value)}
+                                />
                             </div>
                         </div>
+
                         <div className="flex flex-row w-full justify-between">
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Facilities</p>
-                                {/*<input type="text" placeholder="Select Facilities"*/}
-                                {/*       value={formData.facilities}*/}
-                                {/*       onChange={(e) => handleInputChange("facilities", e.target.value)}*/}
-                                {/*       className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"/>*/}
                                 <Multiselect
                                     options={facilityOptions.map((facility) => ({
                                         name: facility,
-                                        id: facility
-                                    }))} // Format options
+                                        id: facility,
+                                    }))}
                                     selectedValues={formData.selectedFacilities.map((facility) => ({
                                         name: facility,
-                                        id: facility
-                                    }))} // Format selected values
+                                        id: facility,
+                                    }))}
                                     onSelect={handleFacilityChange}
                                     onRemove={handleFacilityChange}
                                     displayValue="name"
@@ -241,57 +335,51 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
                                     closeOnSelect={false}
                                     placeholder="Select Facilities"
                                 />
-
                             </div>
                             <div className="w-[45%]">
                                 <p className="font-semibold text-[#383E49]">Types</p>
-                                <div className=" z-10 bg-white border-[1px] rounded ">
-                                    <Multiselect
-                                        options={typeOptions.map((type) => ({name: type, id: type}))}
-                                        selectedValues={formData.selectedTypes.map((type) => ({name: type, id: type}))}
-                                        onSelect={handleTypeChange}
-                                        onRemove={handleTypeChange}
-                                        displayValue="name"
-                                        showCheckbox={true}
-                                        closeOnSelect={false}
-                                        placeholder="Select Types"
+                                <Multiselect
+                                    options={typeOptions.map((type) => ({name: type, id: type}))}
+                                    selectedValues={formData.selectedTypes.map((type) => ({name: type, id: type}))}
+                                    onSelect={handleTypeChange}
+                                    onRemove={handleTypeChange}
+                                    displayValue="name"
+                                    showCheckbox={true}
+                                    closeOnSelect={false}
+                                    placeholder="Select Types"
+                                />
+                            </div>
+                        </div>
+
+                        {formData.selectedTypes.map((type) => (
+                            <div key={type} className="flex flex-row w-full justify-between">
+                                {/* Court Input */}
+                                <div className="w-[45%]">
+                                    <p className="font-semibold text-[#383E49]">{type} Court</p>
+                                    <input
+                                        type="text"
+                                        placeholder={`Enter ${type} Court`}
+                                        value={formData.typeDetails[type]?.court || ""}
+                                        onChange={(e) => handleTypeDetailChange(type, "court", e.target.value)}
+                                        className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
                                     />
                                 </div>
 
-
+                                {/* Cost Input */}
+                                <div className="w-[45%]">
+                                    <p className="font-semibold text-[#383E49]">{type} Cost / Hr</p>
+                                    <input
+                                        type="number"
+                                        placeholder={`Enter ${type} Cost / Hr`}
+                                        value={formData.typeDetails[type]?.cost || ""}
+                                        onChange={(e) => handleTypeDetailChange(type, "cost", e.target.value)}
+                                        className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        {formData.selectedTypes.length > 0 && (
-                            <div className="flex flex-col gap-5">
-                                {formData.selectedTypes.map((type) => (
-                                    <div key={type} className="flex flex-row w-full justify-between">
-                                        {/* Court Input */}
-                                        <div className="w-[45%]">
-                                            <p className="font-semibold text-[#383E49]">{type} Court</p>
-                                            <input
-                                                type="number"
-                                                placeholder={`Enter number of ${type} Courts`}
-                                                value={formData.typeDetails[type]?.court || ""}
-                                                onChange={(e) => handleTypeDetailChange(type, "court", e.target.value)}
-                                                className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
-                                            />
-                                        </div>
+                        ))}
 
-                                        {/* Cost Input */}
-                                        <div className="w-[45%]">
-                                            <p className="font-semibold text-[#383E49]">{type} Cost / Hr</p>
-                                            <input
-                                                type="number"
-                                                placeholder={`Enter ${type} Cost / Hr`}
-                                                value={formData.typeDetails[type]?.cost || ""}
-                                                onChange={(e) => handleTypeDetailChange(type, "cost", e.target.value)}
-                                                className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7]"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+
                         <div className="flex flex-row gap-3 justify-end">
                             <button className="border-[1px] px-6 py-2 rounded-lg text-[#667085] border-[#858D9D]"
                                     onClick={handleCancel}>Cancel
@@ -304,5 +392,5 @@ export default function AddStadiumOverlay({setIsOpenOverlay}){
                 </div>
             </div>
         </div>
-            )
-            }
+    );
+}

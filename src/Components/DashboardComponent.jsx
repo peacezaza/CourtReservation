@@ -4,15 +4,28 @@ import Dropdown from 'react-dropdown';
 import { useNavigate } from 'react-router-dom';
 import 'react-dropdown/style.css';
 import Chart from 'react-apexcharts'
+import { jwtDecode } from "jwt-decode";
 import ReviewComponent from "./ReviewComponent.jsx";
 import UserAccountComponent from "./UserAccountComponent.jsx"
 import NotificationComponent from "./NotificationComponent.jsx";
 
-export default function DashboardComponent() {
+export default function DashboardComponent({setIsFacility}) {
+    const [money, setMoney] = useState(0)
 
-    const money = 2000;
+
+    const dataOptions = ["Weekly", "Monthly", "Yearly"];
+    const defaultDataOption = dataOptions[0];
+    const [selectedOption, setSelectedOption] = useState(defaultDataOption);
+
     let date = new Date();
     const navigate = useNavigate();
+
+    useEffect(() =>{
+        const token = localStorage.getItem('token');
+        const decoded = jwtDecode(token)
+        setMoney(decoded.userData.point);
+
+    })
 
 
     const [isOpenMenuAccount, setIsOpenMenuAccount] = useState(false);
@@ -44,8 +57,6 @@ export default function DashboardComponent() {
 
     })
 
-    const dataOptions = ["Weekly", "Monthly", "Yearly"];
-    const defaultDataOption = dataOptions[0];
 
 
     const locationDetails = [{
@@ -117,6 +128,24 @@ export default function DashboardComponent() {
 
     }
 
+    const handleCreateBooking = () => {
+        setIsFacility(true)
+    }
+
+    const handleSelect = (option) => {
+        setSelectedOption(option.value);
+        // Add any additional logic you need when a selection changes
+        console.log(`Selected: ${option.value}`);
+
+        // Example: If you need to filter data based on selection
+        if (option.value === "Weekly") {
+            // Handle weekly data
+        } else if (option.value === "Monthly") {
+            // Handle monthly data
+        } else if (option.value === "Yearly") {
+            // Handle yearly data
+        }
+    };
     return (
         <div className="grid grid-rows-10 h-full overflow-x-auto">
             <div className="bg-white row-span-1 ">
@@ -131,7 +160,7 @@ export default function DashboardComponent() {
                         </div>
                         <div>
                             <button onClick={() => handleOpenNotification(null)}
-                                    className="p-1 rounded-full  hover:bg-gray-300 "
+                                    className=" rounded-full  hover:bg-gray-300 "
                             >
 
                                 <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
@@ -147,7 +176,7 @@ export default function DashboardComponent() {
                         <div className="relative" >
                             <button
                                 onClick={() => setIsOpenMenuAccount(!isOpenMenuAccount)}
-                                className="p-2 rounded-full  hover:bg-gray-300 "
+                                className=" rounded-full  hover:bg-gray-300 "
                             >
                                 <svg
                                     className="w-8 h-8 text-gray-800 dark:text-white"
@@ -195,7 +224,7 @@ export default function DashboardComponent() {
                         <div></div>
                         <div>{formettedDate.toString()}</div>
                         <div className="">
-                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4">Create Booking
+                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4" onClick={handleCreateBooking}>Create Booking
                             </button>
                         </div>
                     </div>
@@ -206,9 +235,19 @@ export default function DashboardComponent() {
                     <div
                         className="row-span-1 w-full h-[50%] bg-white rounded-t-xl flex flex-row justify-between px-3 items-center">
                         <div className="font-semibold text-3xl">Overview</div>
-                        <div className="">
-                            <Dropdown className="border-2 " options={dataOptions} value={defaultDataOption}
-                                      placeholder="Select an option" />
+                        <div className="relative w-40">
+                            <Dropdown
+                                className="border border-gray-300 rounded-lg shadow-sm bg-white"
+                                controlClassName="py-2 px-4 text-gray-700 w-full flex justify-between items-center cursor-pointer"
+                                menuClassName="bg-white mt-1 rounded-lg shadow-md border border-gray-200 py-1 z-50"
+                                arrowClassName="text-gray-500"
+                                arrowClosed={<span className="ml-2">▼</span>}
+                                arrowOpen={<span className="ml-2">▲</span>}
+                                options={dataOptions}
+                                value={selectedOption}
+                                onChange={handleSelect}
+                                placeholder="Select an option"
+                            />
                         </div>
                     </div>
                     <div className="row-span-1 w-full h-[50%] rounded-b-xl flex flex-row justify-around">
@@ -261,18 +300,39 @@ export default function DashboardComponent() {
                     </div>
                 </div>
                 <div className="row-span-3 bg-white w-[90%] h-full place-self-center rounded-xl">
-                    <div className="w-full h-full overflow-y-auto overflow-x-auto ">
-                        <table className="w-full table-auto">
+                    <div
+                        className="w-full h-full overflow-y-auto overflow-x-auto bg-gray-50 p-6 rounded-lg shadow-sm scrollbar-thin"
+                        style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: '#94a3b8 #e2e8f0'
+                        }}
+                    >
+                        <table className="w-full table-auto border-collapse">
                             <thead className="border-b-2 sticky top-0 z-10 bg-white">
                             {tableHeader.map((key, index) => (
-                                <th className="text-[#9CA3AF] text-3xl py-3 px-5" key={index}>{key}</th>
+                                <th
+                                    className="text-gray-600 font-semibold text-xl py-4 px-6 text-left border-b-2 border-gray-400"
+                                    key={index}
+                                >
+                                    {key}
+                                </th>
                             ))}
                             </thead>
-                            <tbody className="text-center text-xl">
+                            <tbody className="text-gray-700 text-lg">
                             {locationDetails.map((row, rowIndex) => (
-                                <tr className="h-[5rem] hover:bg-gray-200" key={rowIndex}>{Object.keys(row).map((key, index) => (
-                                    <td key={index}>{row[key]}</td>
-                                ))}</tr>
+                                <tr
+                                    className="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+                                    key={rowIndex}
+                                >
+                                    {Object.keys(row).map((key, index) => (
+                                        <td
+                                            className="py-4 px-6 text-left"
+                                            key={index}
+                                        >
+                                            {row[key]}
+                                        </td>
+                                    ))}
+                                </tr>
                             ))}
                             </tbody>
                         </table>
@@ -281,13 +341,14 @@ export default function DashboardComponent() {
                 <div className="row-span-3 w-[90%] h-full place-self-center rounded-xl grid grid-cols-5 gap-6">
                     <div className="col-span-3 bg-white rounded-xl flex flex-col px-4">
                         <div className="text-2xl"><p>Occupancy Statistics</p></div>
-                        <div><Chart options={options} series={series} type="bar" height={250} width="95%" className="" /></div>
+                        <div><Chart options={options} series={series} type="bar" height={250} width="95%" className=""/>
+                        </div>
                     </div>
                     <div className="col-span-2 bg-white rounded-xl flex-col">
                         <div className="text-xl flex items-center px-4 flex-row justify-between py-3">
                             <div>Customers feedback</div>
                             <button onClick={() => handleOpenReview(null)}>
-                                <Icon icon="ph:dots-three-vertical-bold" />
+                                <Icon icon="ph:dots-three-vertical-bold"/>
                             </button>
 
                         </div>
@@ -301,7 +362,7 @@ export default function DashboardComponent() {
                         </div>
                     </div>
                 </div>
-                {OpenReview && <ReviewComponent onClose={() => setOpenReview(null)} />}
+                {OpenReview && <ReviewComponent onClose={() => setOpenReview(null)}/>}
                 {OpenNotification && <NotificationComponent onClose={() => setOpenNotification(null)} />}
                 {OpenUserAccount && <UserAccountComponent onClose={() => setOpenUserAccount(null)} />}
             </div>

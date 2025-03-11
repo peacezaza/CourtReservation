@@ -207,7 +207,7 @@ export default function FacilityDetails({ stadiumSelect }) {
         }).catch((error) => {
             console.error("Error fetching stadium data:", error);
         });
-    }, [selectedPeriod]);  // Dependency on selectedPeriod for triggering the API call
+    }, [selectedPeriod, selectDate, selectedStadium]);  // Dependency on selectedPeriod for triggering the API call
 
     useEffect(() => {
         setStadiumOptions([

@@ -66,16 +66,6 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
     }
 
 
-    //
-    // const stadiums = [
-    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg" },
-    //     { name: "Ruammitr court", location: "Chon buri, Sriracha", rating: 4.9, image: "https://canaltenis.com/wp-content/uploads/2024/10/WTA-Finals-punto-mira-tenis-femenino-990x554.jpg", underMaintenance: true },
-    // ];
-
     return (
         <div className="grid grid-rows-10 h-full overflow-y-hidden">
             <div className="row-span-1">
@@ -85,7 +75,6 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
                             <div>
                                 <Icon icon="noto:coin" className="w-9 h-9"/>
                             </div>
-
                             <div>{money}</div>
                         </div>
                         <div>

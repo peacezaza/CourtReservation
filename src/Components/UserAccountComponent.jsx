@@ -16,7 +16,7 @@ export default function UserAccount({ onClose }) {
     useEffect(() => {
         const token = localStorage.getItem("token");
         try{
-            const response = axios.get("http://localhost:3000/getUserData",
+            axios.get("http://localhost:3000/getUserData",
                 {
                     headers: {'Authorization': `Bearer ${token}`}
                 }).then((response) => {

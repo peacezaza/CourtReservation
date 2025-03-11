@@ -13,6 +13,8 @@ export default function NotificationComponent({ onClose }) {
         { text: "ห้องน้ำสะอาด", rating: 4.5 },
     ];
 
+
+
     return (
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"

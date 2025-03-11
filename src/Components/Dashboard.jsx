@@ -43,6 +43,9 @@ export default function Dashboard() {
 
         if (isFacility) {
             setIsFacilityOpen(false);
+            setIsDashboardOpen(false)
+            setIsFacilityOpen(false)
+            setIsBookingOpen(false)
             // console.log(stadiumSelect)
         }
 
@@ -83,6 +86,9 @@ export default function Dashboard() {
         }
         else if(isFacility){
             setIsFacilityOpen(false);
+            setIsDashboardOpen(false)
+            setIsFacilityOpen(false)
+            setIsBookingOpen(false)
         }
     }
 
@@ -93,46 +99,57 @@ export default function Dashboard() {
     return (
         <div className="flex flex-row h-screen">
             {/* Left Side*/}
-            <div className="w-[15%]">
-                <div className="flex flex-col justify-start items-center  space-y-5">
-                    <img src="/logo.png" alt="logo" className="w-[25%] h-[10%]"/>
-                    <div className="w-full flex justify-center">
-                        <button onClick={event => handleNavClick(event, "Dashboard")} className={`rounded-xl py-2 flex flex-row justify-around items-center w-[70%] space-x-6 text-gray-600  hover:bg-black hover:text-white ${isDashboardOpen === true ? "bg-black text-white"  : "bg-white text-black"}`}>
-                            <img src="/homeBlack.png" alt="home" className="w-10 h-10"/>
-                            <p className="text-xl">Dashboard</p>
+            <div className="w-[15%] min-w-[180px] lg:w-[12%] xl:w-[15%]">
+                <div className="grid grid-cols-1 gap-3 lg:gap-5 justify-items-center">
+                    <img src="/logo.png" alt="logo" className="w-[25%] lg:w-[25%] xl:w-[25%] my-2"/>
+
+                    <div className="w-full grid justify-items-center">
+                        <button
+                            onClick={event => handleNavClick(event, "Dashboard")}
+                            className={`rounded-xl py-1 lg:py-2 grid grid-cols-[auto_1fr] gap-2 lg:gap-4 items-center w-[85%] lg:w-[80%] xl:w-[70%] text-gray-600 hover:bg-black hover:text-white ${isDashboardOpen === true ? "bg-black text-white" : "bg-white text-black"}`}
+                        >
+                            <img src="/homeBlack.png" alt="home" className="w-8 h-8 lg:w-10 lg:h-10 ml-2"/>
+                            <p className="text-base lg:text-xl">Dashboard</p>
                         </button>
                     </div>
 
-                    <div className="w-full flex justify-center">
-                        <button onClick={event => handleNavClick(event, "Booking")} className={`rounded-xl py-2 flex flex-row justify-around items-center w-[70%] space-x-6 text-gray-600 hover:bg-black hover:text-white ${isBookingOpen === true ? "bg-black text-white"  : "bg-white text-black"}`}>
-                            <img src="/booking.png" alt="booking" className="w-10 h-10"/>
-                            <p className="text-xl">Booking</p>
+                    <div className="w-full grid justify-items-center">
+                        <button
+                            onClick={event => handleNavClick(event, "Booking")}
+                            className={`rounded-xl py-1 lg:py-2 grid grid-cols-[auto_1fr] gap-2 lg:gap-4 items-center w-[85%] lg:w-[80%] xl:w-[70%] text-gray-600 hover:bg-black hover:text-white ${isBookingOpen === true ? "bg-black text-white" : "bg-white text-black"}`}
+                        >
+                            <img src="/booking.png" alt="booking" className="w-8 h-8 lg:w-10 lg:h-10 ml-2"/>
+                            <p className="text-base lg:text-xl">Booking</p>
                         </button>
                     </div>
 
-                    <div className="w-full flex justify-center">
-                        <button onClick={event => handleNavClick(event, "Facility")} className={`rounded-xl py-2 flex flex-row justify-around items-center w-[70%] space-x-6 text-gray-600 hover:bg-black hover:text-white ${isFacilityOpen === true || isFacility === true ? "bg-black text-white"  : "bg-white text-black"}`}>
-                            {/*<img src="/facility.png" alt="facility" className="w-10 h-10" />*/}
-                            <Icon icon="guidance:stadium" style={{ width : '34px' , height : '36px'}} />
-                            <p className="text-xl">Facilities</p>
+                    <div className="w-full grid justify-items-center">
+                        <button
+                            onClick={event => handleNavClick(event, "Facility")}
+                            className={`rounded-xl py-1 lg:py-2 grid grid-cols-[auto_1fr] gap-2 lg:gap-4 items-center w-[85%] lg:w-[80%] xl:w-[70%] text-gray-600 hover:bg-black hover:text-white ${isFacilityOpen === true || isFacility === true ? "bg-black text-white" : "bg-white text-black"}`}
+                        >
+                            <Icon icon="guidance:stadium" className="w-8 h-8 lg:w-9 lg:h-9 ml-2"/>
+                            <p className="text-base lg:text-xl">Facilities</p>
                         </button>
                     </div>
 
-                    <div className="w-full flex justify-center">
-                        <button onClick={event => handleNavClick(event, "Transaction")} className={`rounded-xl py-2 flex flex-row justify-around items-center w-[70%] space-x-6 text-gray-600 hover:bg-black hover:text-white ${isTransactionOpen === true ? "bg-black text-white"  : "bg-white text-black"}`}>
-                            {/*<img src="/transaction.png" alt="Transaction" className="w-10 h-10"/>*/}
-                            <Icon icon="icon-park-solid:transaction" style={{ fontSize: '36px' }}/>
-                            <p className="text-xl">Transaction</p>
+                    <div className="w-full grid justify-items-center">
+                        <button
+                            onClick={event => handleNavClick(event, "Transaction")}
+                            className={`rounded-xl py-1 lg:py-2 grid grid-cols-[auto_1fr] gap-2 lg:gap-4 items-center w-[85%] lg:w-[80%] xl:w-[70%] text-gray-600 hover:bg-black hover:text-white ${isTransactionOpen === true ? "bg-black text-white" : "bg-white text-black"}`}
+                        >
+                            <Icon icon="icon-park-solid:transaction" className="w-8 h-8 lg:w-9 lg:h-9 ml-2"/>
+                            <p className="text-base lg:text-xl">Transaction</p>
                         </button>
                     </div>
-
                 </div>
             </div>
             {/*Right Side*/}
             <div className="w-[85%]">
-                {isDashboardOpen &&<DashboardComponent/>}
-                {isBookingOpen && <BookingComponent/>}
-                {isFacilityOpen && <FacilityComponent setIsFacility={setIsFacility} setStadiumSelect={setStadiumSelect}/>}
+                {isDashboardOpen && <DashboardComponent setIsFacility={setIsFacility}/>}
+                {isBookingOpen && <BookingComponent setIsFacility={setIsFacility}/>}
+                {isFacilityOpen &&
+                    <FacilityComponent setIsFacility={setIsFacility} setStadiumSelect={setStadiumSelect}/>}
                 {isTransactionOpen && <TransactionComponent/>}
                 {isFacility && <FacilityDetails stadiumSelect={stadiumSelect}/>}
             </div>

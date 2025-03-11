@@ -3,59 +3,111 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useEffect } from "react";
 import BookingDetail from "./BookingDetail.jsx";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import ReviewComponent from "./ReviewComponent.jsx";
+import UserAccountComponent from "./UserAccountComponent.jsx"
+import NotificationComponent from "./NotificationComponent.jsx";
+import {useNavigate} from "react-router-dom";
 
+export default function BookingComponent({setIsFacility}) {
+    const [money, setMoney] = useState(0)
 
-export default function BookingComponent() {
     const [isOpenOverlay, setIsOpenOverlay] = useState(false)
     const [filterStatus, setFilterStatus] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; // แสดง 10 รายการต่อหน้า
     const [selectedBooking, setSelectedBooking] = useState(null);
-
+    const [isOpenMenuAccount, setIsOpenMenuAccount] = useState(false);
     const [isCancelOverlayOpen, setIsCancelOverlayOpen] = useState(false);
     const [bookingToCancel, setBookingToCancel] = useState(null);
 
+    const [OpenReview, setOpenReview] = useState(null);
+    const [OpenUserAccount, setOpenUserAccount] = useState(null);
+    const [OpenNotification, setOpenNotification] = useState(null);
+
+    const navigate = useNavigate();
+
+
+    const handleOpenNotification = () => {
+        setOpenNotification(prev => !prev); // Trigger state change on button click
+    }
+
+    const handleOpenUserAccount = () => {
+        setOpenUserAccount(prev => !prev); // Trigger state change on button click
+    }
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        console.log("Logout");
+        navigate("/")
+
+    }
+
+    const handleCreateBooking = () => {
+        setIsFacility(true)
+    }
 
 
 
 
-    const reservationsData = [
-        { id: "6742", name: "Chris", contact: "(123) 456-395", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "1", date: "2025-01-05", time: "10.00 AM - 12.00 PM" },
-        { id: "4002", name: "John", contact: "(123) 456-207", stadium: "Sriracha Arena", facility: "Tennis", status: "Confirmed", amount: 300, courtnumber: "2", date: "2025-01-06", time: "12.00 PM - 2.00 PM" },
-        { id: "3605", name: "Isabellaa", contact: "(123) 456-191", stadium: "Ryummit", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "3", date: "2025-01-07", time: "2.00 PM - 4.00 PM" },
-        { id: "1647", name: "Chris", contact: "(123) 456-996", stadium: "Grand Stadium", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "4", date: "2025-01-08", time: "4.00 PM - 6.00 PM" },
-        { id: "6918", name: "Emily", contact: "(123) 456-414", stadium: "Sriracha Arena", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "5", date: "2025-01-09", time: "6.00 PM - 8.00 PM" },
-        { id: "9063", name: "Lucas", contact: "(123) 456-662", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "6", date: "2025-01-10", time: "8.00 AM - 10.00 AM" },
-        { id: "5641", name: "Martin", contact: "(123) 456-974", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "7", date: "2025-01-11", time: "10.00 AM - 12.00 PM" },
-        { id: "6374", name: "Lily", contact: "(123) 456-909", stadium: "Grand Stadium", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "8", date: "2025-01-12", time: "12.00 PM - 2.00 PM" },
-        { id: "5307", name: "Pegasus", contact: "(123) 456-802", stadium: "Olympic Court", facility: "Football", status: "Confirmed", amount: 150, courtnumber: "9", date: "2025-01-13", time: "2.00 PM - 4.00 PM" },
-        { id: "7253", name: "Sarah", contact: "(123) 456-535", stadium: "Ryummit", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "10", date: "2025-01-14", time: "4.00 PM - 6.00 PM" },
-        { id: "6395", name: "Mason", contact: "(123) 456-512", stadium: "Ryummit", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "11", date: "2025-01-15", time: "6.00 PM - 8.00 PM" },
-        { id: "5985", name: "Sarah", contact: "(123) 456-110", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "12", date: "2025-01-16", time: "8.00 AM - 10.00 AM" },
-        { id: "4312", name: "Alexander", contact: "(123) 456-157", stadium: "Grand Stadium", facility: "Football", status: "Confirmed", amount: 150, courtnumber: "13", date: "2025-01-17", time: "10.00 AM - 12.00 PM" },
-        { id: "7550", name: "Cecil", contact: "(123) 456-855", stadium: "Olympic Court", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "14", date: "2025-01-18", time: "12.00 PM - 2.00 PM" },
-        { id: "2339", name: "Alexander", contact: "(123) 456-178", stadium: "Sriracha Arena", facility: "Badminton", status: "Cancelled", amount: 150, courtnumber: "15", date: "2025-01-19", time: "2.00 PM - 4.00 PM" },
-        { id: "2639", name: "Alexander", contact: "(123) 456-413", stadium: "Olympic Court", facility: "Badminton", status: "Confirmed", amount: 150, courtnumber: "16", date: "2025-01-20", time: "4.00 PM - 6.00 PM" },
-        { id: "7415", name: "Sophia", contact: "(123) 456-808", stadium: "Sriracha Arena", facility: "Tennis", status: "Cancelled", amount: 150, courtnumber: "17", date: "2025-01-21", time: "6.00 PM - 8.00 PM" },
-        { id: "5922", name: "Sophia", contact: "(123) 456-271", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "18", date: "2025-01-22", time: "8.00 AM - 10.00 AM" },
-        { id: "7158", name: "Lucas", contact: "(123) 456-942", stadium: "Grand Stadium", facility: "Badminton", status: "Confirmed", amount: 150, courtnumber: "19", date: "2025-01-23", time: "10.00 AM - 12.00 PM" },
-        { id: "6836", name: "Pegasus", contact: "(123) 456-566", stadium: "Sriracha Arena", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "20", date: "2025-01-24", time: "12.00 PM - 2.00 PM" }
-    ];
+    // const reservationsData = [
+    //     { id: "6742", name: "Chris", contact: "(123) 456-395", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "1", date: "2025-01-05", time: "10.00 AM - 12.00 PM" },
+    //     { id: "4002", name: "John", contact: "(123) 456-207", stadium: "Sriracha Arena", facility: "Tennis", status: "Confirmed", amount: 300, courtnumber: "2", date: "2025-01-06", time: "12.00 PM - 2.00 PM" },
+    //     { id: "3605", name: "Isabellaa", contact: "(123) 456-191", stadium: "Ryummit", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "3", date: "2025-01-07", time: "2.00 PM - 4.00 PM" },
+    //     { id: "1647", name: "Chris", contact: "(123) 456-996", stadium: "Grand Stadium", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "4", date: "2025-01-08", time: "4.00 PM - 6.00 PM" },
+    //     { id: "6918", name: "Emily", contact: "(123) 456-414", stadium: "Sriracha Arena", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "5", date: "2025-01-09", time: "6.00 PM - 8.00 PM" },
+    //     { id: "9063", name: "Lucas", contact: "(123) 456-662", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "6", date: "2025-01-10", time: "8.00 AM - 10.00 AM" },
+    //     { id: "5641", name: "Martin", contact: "(123) 456-974", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "7", date: "2025-01-11", time: "10.00 AM - 12.00 PM" },
+    //     { id: "6374", name: "Lily", contact: "(123) 456-909", stadium: "Grand Stadium", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "8", date: "2025-01-12", time: "12.00 PM - 2.00 PM" },
+    //     { id: "5307", name: "Pegasus", contact: "(123) 456-802", stadium: "Olympic Court", facility: "Football", status: "Confirmed", amount: 150, courtnumber: "9", date: "2025-01-13", time: "2.00 PM - 4.00 PM" },
+    //     { id: "7253", name: "Sarah", contact: "(123) 456-535", stadium: "Ryummit", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "10", date: "2025-01-14", time: "4.00 PM - 6.00 PM" },
+    //     { id: "6395", name: "Mason", contact: "(123) 456-512", stadium: "Ryummit", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "11", date: "2025-01-15", time: "6.00 PM - 8.00 PM" },
+    //     { id: "5985", name: "Sarah", contact: "(123) 456-110", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "12", date: "2025-01-16", time: "8.00 AM - 10.00 AM" },
+    //     { id: "4312", name: "Alexander", contact: "(123) 456-157", stadium: "Grand Stadium", facility: "Football", status: "Confirmed", amount: 150, courtnumber: "13", date: "2025-01-17", time: "10.00 AM - 12.00 PM" },
+    //     { id: "7550", name: "Cecil", contact: "(123) 456-855", stadium: "Olympic Court", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "14", date: "2025-01-18", time: "12.00 PM - 2.00 PM" },
+    //     { id: "2339", name: "Alexander", contact: "(123) 456-178", stadium: "Sriracha Arena", facility: "Badminton", status: "Cancelled", amount: 150, courtnumber: "15", date: "2025-01-19", time: "2.00 PM - 4.00 PM" },
+    //     { id: "2639", name: "Alexander", contact: "(123) 456-413", stadium: "Olympic Court", facility: "Badminton", status: "Confirmed", amount: 150, courtnumber: "16", date: "2025-01-20", time: "4.00 PM - 6.00 PM" },
+    //     { id: "7415", name: "Sophia", contact: "(123) 456-808", stadium: "Sriracha Arena", facility: "Tennis", status: "Cancelled", amount: 150, courtnumber: "17", date: "2025-01-21", time: "6.00 PM - 8.00 PM" },
+    //     { id: "5922", name: "Sophia", contact: "(123) 456-271", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "18", date: "2025-01-22", time: "8.00 AM - 10.00 AM" },
+    //     { id: "7158", name: "Lucas", contact: "(123) 456-942", stadium: "Grand Stadium", facility: "Badminton", status: "Confirmed", amount: 150, courtnumber: "19", date: "2025-01-23", time: "10.00 AM - 12.00 PM" },
+    //     { id: "6836", name: "Pegasus", contact: "(123) 456-566", stadium: "Sriracha Arena", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "20", date: "2025-01-24", time: "12.00 PM - 2.00 PM" }
+    // ];
 
     const [reservations, setReservations] = useState([]);
     useEffect(() => {
-        setReservations(reservationsData);
+        const token = localStorage.getItem("token");
+        const decoded = jwtDecode(token)
+        setMoney(decoded.userData.point);
+
+        axios.get("http://localhost:3000/getReservationData", {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).then((response) => {
+            const formattedReservations = response.data.data.map(res => {
+                const reservationDate = new Date(res.date);  // Use res.date
+                const localReservationDate = new Date(reservationDate.getTime() - reservationDate.getTimezoneOffset() * 60000);
+                const reservationDatePart = localReservationDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+
+                return { ...res, date: reservationDatePart }; // Update date format
+            });
+
+            setReservations(formattedReservations);
+        }).catch((error) => {
+            console.error("Error fetching stadium data:", error);
+        });
     }, []);
+
 
 
     // ฟังก์ชันยกเลิกการจอง
     const handleCancelBooking = (bookingId) => {
         setReservations(prevReservations =>
             prevReservations.map(res =>
-                res.id === bookingId ? { ...res, status: "Cancelled" } : res
+                res.id === bookingId ? { ...res, status: "cancelled" } : res
             )
         );
+
         setSelectedBooking(null); // Close popup
     };
     const handleCancelOverlayClose = () => {
@@ -71,21 +123,50 @@ export default function BookingComponent() {
 
     // Function to confirm cancellation
     const handleConfirmCancel = () => {
+        let status = false;
         if (bookingToCancel) {
+            console.log(bookingToCancel)
             setReservations(prev =>
-                prev.map(res =>
-                    res.id === bookingToCancel.id ? { ...res, status: "Cancelled" } : res
-                )
+                prev.map(res =>{
+                    return res.id === bookingToCancel.id ? { ...res, status: "cancelled" } : res
+                })
             );
             setIsCancelOverlayOpen(false);
             setBookingToCancel(null);
+            try{
+                console.log("TEST")
+                const token = localStorage.getItem("token")
+                const date = new Date(bookingToCancel.date).toISOString().split('T')[0];
+                const data = {
+                    "court_id" : bookingToCancel.court_id,
+                    "reservation_id" : bookingToCancel.id,
+                    "amount" : bookingToCancel.amount,
+                    "owner_id" : bookingToCancel.owner_id,
+                    "user_id" : bookingToCancel.user_id,
+                    "date" : date,
+                    "start_time" : bookingToCancel.start_time,
+                    "end_time" : bookingToCancel.end_time,
+                    "status" : "cancelled"
+                }
+                axios.put("http://localhost:3000/updateReservationStatus", data, {
+                    headers: {'Authorization': `Bearer ${token}`}
+                }).then((response) => {
+                    console.log(response)
+                })
+            }
+            catch (e){
+                console.log(e)
+            }
         }
+
+
+
     };
 
     const matchesStatus =
         filterStatus === "All" ||
-        (filterStatus === "Ongoing" && res.status === "Confirmed") ||
-        (filterStatus === "Completed" && res.status === "Cancelled");
+        (filterStatus === "Ongoing" && res.status === "confirmed") ||
+        (filterStatus === "Completed" && res.status === "cancelled");
 
 
     const filteredReservations = reservations.filter(res => {
@@ -112,7 +193,6 @@ export default function BookingComponent() {
         }
     };
 
-    const money = 2000;
     let date = new Date();
 
     const formettedDate = new Intl.DateTimeFormat('en-US', {
@@ -123,8 +203,9 @@ export default function BookingComponent() {
     }).format(date)
 
     const handleCreatebooking = (event) => {
-        console.log("Create Booking is Clicked\n")
-        setIsOpenOverlay(true)
+        // console.log("Create Booking is Clicked\n")
+        // setIsOpenOverlay(true)
+        setIsFacility(true)
     }
 
     const handleSelectBooking = (booking) => {
@@ -136,40 +217,93 @@ export default function BookingComponent() {
 
     return (
         <div className="grid grid-rows-10 h-full">
-            <div className="row-span-1">
-                <div className="flex flex-col gap-3 ">
+            <div className="bg-white row-span-1 ">
+                <div className="flex flex-col gap-3">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
                         <div className="flex flex-row space-x-2 items-center">
                             <div>
-                                <Icon icon="noto:coin" className="w-9 h-9" />
+                                <Icon icon="noto:coin" className="w-9 h-9"/>
                             </div>
 
                             <div>{money}</div>
                         </div>
                         <div>
-                            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                      d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" />
-                            </svg>
+                            <button onClick={() => handleOpenNotification(null)}
+                                    className=" rounded-full  hover:bg-gray-300 "
+                            >
+
+                                <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
+                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black"
+                                     viewBox="0 0 24 24">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z"/>
+                                </svg>
+                            </button>
                         </div>
 
-                        <div>
-                            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                                 viewBox="0 0 24 24">
-                                <path fill-rule="evenodd"
-                                      d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
-                                      clip-rule="evenodd" />
-                            </svg>
+                        {/* MenuUser */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsOpenMenuAccount(!isOpenMenuAccount)}
+                                className=" rounded-full  hover:bg-gray-300 "
+                            >
+                                <svg
+                                    className="w-8 h-8 text-gray-800 dark:text-white"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="black"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
+                            {isOpenMenuAccount && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                    <div className="px-4 py-2 flex items-center space-x-2">
+                                        <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"/>
+                                        </svg>
+                                        <span className="font-semibold">Tanapat</span>
+                                    </div>
+                                    <hr/>
+                                    <button
+                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                                        onClick={() => handleOpenUserAccount(null)}>
+                                        <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"/>
+                                        </svg>
+                                        <span>My Account</span>
+                                    </button>
+                                    <hr/>
+                                    <button
+                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                                        onClick={handleLogout}>
+                                        <Icon icon="material-symbols:logout" className="w-5 h-5 text-gray-600"/>
+                                        <span>Logout</span>
+                                    </button>
+
+                                </div>
+                            )}
                         </div>
+
                     </div>
                     <div className="flex flex-row items-center justify-between">
                         <div></div>
                         <div>{formettedDate.toString()}</div>
                         <div className="">
-                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4 mr-4" onClick={handleCreatebooking}>Create Booking
+                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4"
+                                    onClick={handleCreateBooking}>Create Booking
                             </button>
                         </div>
                     </div>
@@ -190,7 +324,7 @@ export default function BookingComponent() {
                         ))}
                     </div>
                     <div className="flex space-x-2">
-                        {['All', 'Confirmed', 'Cancelled'].map(status => (
+                        {['All', 'confirmed', 'cancelled'].map(status => (
                             <button
                                 key={status}
                                 className={`px-4 py-2 rounded-full ${filterStatus === status ? 'bg-blue-500 text-white' : 'bg-transparent border-2'}`}
@@ -202,7 +336,7 @@ export default function BookingComponent() {
                         ))}
 
                         <div className="relative flex items-center">
-                            <Icon icon="mdi:magnify" className="absolute left-3 w-5 h-5 text-gray-400" />
+                            <Icon icon="mdi:magnify" className="absolute left-3 w-5 h-5 text-gray-400"/>
                             <input
                                 type="text"
                                 placeholder="Search by name or ID"
@@ -236,19 +370,20 @@ export default function BookingComponent() {
                                 <td className="px-4 py-5">Phone: {res.contact}</td>
                                 <td className="px-4 py-5">{res.stadium}</td>
                                 <td className="px-4 py-5">{res.facility}</td>
-                                <td className={`px-4 py-5 ${res.status === 'Cancelled' ? 'text-red-500' : 'text-green-500'}`}>{res.status}</td>
+                                <td className={`px-4 py-5 ${res.status === 'cancelled' ? 'text-red-500' : 'text-green-500'}`}>{res.status}</td>
                                 <td className="px-4 py-5">{res.amount}</td>
                                 <td className="px-4 py-5 text-grey-100 cursor-pointer relative flex items-center space-x-3">
                                     <div className="flex items-center w-15 justify-between">
-                                        {res.status === 'Confirmed' ? (
+                                        {res.status === 'confirmed' ? (
                                             <button onClick={() => openCancelOverlay(res)}>
-                                                <Icon icon="mdi:trash-can-outline" className="w-5 h-5 text-red-500 cursor-pointer" />
+                                                <Icon icon="mdi:trash-can-outline"
+                                                      className="w-5 h-5 text-red-500 cursor-pointer"/>
                                             </button>
                                         ) : (
                                             <span className="w-5 h-5"></span> // Placeholder to maintain spacing
                                         )}
                                         <button onClick={() => handleSelectBooking(res)} className="ml-2">
-                                            <Icon icon="mdi:dots-vertical" className="w-5 h-5" />
+                                            <Icon icon="mdi:dots-vertical" className="w-5 h-5"/>
                                         </button>
                                     </div>
 
@@ -291,8 +426,8 @@ export default function BookingComponent() {
                     </div>
                 )}
 
-                {isOpenOverlay && <CreateBookingOverlay setIsOpenOverlay={setIsOpenOverlay} />}
-                {selectedBooking && <BookingDetail booking={selectedBooking} onClose={() => setSelectedBooking(null)} />}
+                {isOpenOverlay && <CreateBookingOverlay setIsOpenOverlay={setIsOpenOverlay}/>}
+                {selectedBooking && <BookingDetail booking={selectedBooking} onClose={() => setSelectedBooking(null)}/>}
                 {selectedBooking && (
                     <BookingDetail
                         booking={selectedBooking}

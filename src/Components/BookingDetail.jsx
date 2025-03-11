@@ -1,4 +1,4 @@
-export default function BookingDetail({ booking, onClose }) {
+export default function BookingDetail({ booking, onClose, onCancel }) {
     if (!booking) return null; // ป้องกัน error กรณีไม่มีข้อมูล
 
     return (
@@ -21,11 +21,16 @@ export default function BookingDetail({ booking, onClose }) {
                         <p className=" text-black">Status:</p> <p className="text-gray-400">{booking.status}</p>
                     </div>
                 </div>
-                <div className="mt-3 flex justify-center" >
-                    <button onClick={onClose} className=" font-bold mt-4 px-6 py-2 bg-red-100 text-red-600 rounded-xl text-xl">
-                        cancle
-                    </button>
-                </div>
+                {/* {booking.status === "Confirmed" && (
+                    <div className="mt-3 flex justify-center">
+                        <button
+                            onClick={() => onCancel(booking.id)}
+                            className="font-bold mt-4 px-6 py-2 bg-red-100 text-red-600 rounded-xl text-xl"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )} */}
 
             </div>
         </div>

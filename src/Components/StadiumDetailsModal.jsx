@@ -1,12 +1,17 @@
 import { Icon } from "@iconify/react";
+import {useEffect} from "react";
 
 export default function StadiumDetailsModal({ stadium, onClose }) {
     if (!stadium) return null;
 
+    useEffect(() => {
+        console.log(stadium);
+    }, []);
 
     const handleClose = () => {
         onClose(); // เรียกใช้งาน onClose ที่มาจาก prop
     };
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -18,7 +23,7 @@ export default function StadiumDetailsModal({ stadium, onClose }) {
 
                 {/* เนื้อหา Modal */}
                 <div className="flex flex-col items-center gap-4 p-4  ">
-                    <img src={stadium.image} alt={stadium.name} className="w-full h-46 object-cover rounded-lg" />
+                    <img src={stadium.pictures[0]} alt={stadium.name} className="w-full h-46 object-cover rounded-lg" />
                     <h2 className="text-xl font-semibold mt-3">{stadium.name}</h2>
                     <p className="text-gray-500">{stadium.location}</p>
                     <div className="flex items-center mt-2">

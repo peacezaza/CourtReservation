@@ -8,11 +8,17 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [type, setType] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [resetEmail, setResetEmail] = useState("");
+    const [resetMessage, setResetMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        setErrorMessage(""); // Clear previous error messages
 
         axios.post("http://localhost:3000/login", {
             email: email,
@@ -22,30 +28,46 @@ export default function Login() {
             if (response.data.status) {
                 console.log("Logged in successfully");
                 localStorage.setItem("token", response.data.token);
+                const decoded = jwtDecode(response.data.token);
+                setType(decoded.userData.user_type);
+
                 setIsLoggedIn(true);
+                setEmail("");
+                setPassword("");
+            }
+        }).catch((error) => {
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.message || "Login failed");
+            } else {
+                setErrorMessage("An unexpected error occurred. Please try again.");
             }
         });
+
         setEmail("");
         setPassword("");
     }
 
     useEffect(() => {
-        if (isLoggedIn) {
-            const token = localStorage.getItem("token");
-            if (token) {
-                const decoded = jwtDecode(token);
-                setType(decoded.userData.user_type);
-            }
+        if (isLoggedIn && type) {
+            navigate(type === "owner" ? "/dashboard" : "/AdminDashboard");
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, type, navigate]);
 
-    useEffect(() => {
-        if (type === "owner") {
-            navigate("/dashboard");
-        } else if (type === "admin") {
-            navigate("/AdminDashboard");
+
+    const handleForgetPassword = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setResetMessage("");
+
+        try {
+            const response = await axios.post("http://localhost:3000/forgot-password", { email: resetEmail });
+            setResetMessage(response.data.message || "Password reset link sent!");
+        } catch (error) {
+            setResetMessage(error.response?.data?.message || "Failed to send reset link.");
         }
-    }, [type, navigate]);
+
+        setLoading(false);
+    };
 
     return (
         <div className="flex h-screen">
@@ -63,7 +85,7 @@ export default function Login() {
                     </p>
                 </div>
                 <div className="text-white/70 text-sm">
-                    © 2024 terkcode. All rights reserved.
+                    Â© 2024 terkcode. All rights reserved.
                 </div>
             </div>
 
@@ -87,14 +109,23 @@ export default function Login() {
                                 className="w-full p-3 border-b border-gray-300 focus:outline-none focus:border-[#2243E8]"
                             />
                         </div>
-                        <div>
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full p-3 border-b border-gray-300 focus:outline-none focus:border-[#2243E8]"
-                            />
+                        <div className="w-full flex flex-col items-center">
+                            <div className="w-full flex justify-center relative">
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full p-3 border-b border-gray-300 focus:outline-none focus:border-[#2243E8]"
+                                />
+                            </div>
+
+                            {/* Show errorMessage from API */}
+                            {errorMessage && (
+                                <div className="w-full text-left mt-1 text-red-500 text-xs">
+                                    {errorMessage}
+                                </div>
+                            )}
                         </div>
                         <button
                             type="submit"
@@ -102,7 +133,7 @@ export default function Login() {
                         >
                             Login Now
                         </button>
-                        <button
+                        {/* <button
                             type="button"
                             className="w-full border border-gray-300 p-3 rounded-lg flex items-center justify-center space-x-2"
                         >
@@ -125,14 +156,51 @@ export default function Login() {
                                 />
                             </svg>
                             <span>Login with Google</span>
-                        </button>
+                        </button> */}
 
-                        <div className="text-center text-gray-500">
-                            Forget password? <a href="#" className="text-black">Click here</a>
-                        </div>
+
                     </form>
+                    <div className="text-center text-gray-500 mt-4">
+
+                        Forget password?
+                        <button onClick={() => setIsModalOpen(true)} className="text-black underline">Click here
+                        </button>
+                    </div>
                 </div>
             </div>
+            {/* Forget Password Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                        <h2 className="text-xl font-bold mb-4">Forgot Password?</h2>
+                        <p className="text-sm text-gray-600 mb-4">Enter your email to receive a password reset link.</p>
+
+                        <form onSubmit={handleForgetPassword} className="space-y-4">
+                            <input
+                                type="email"
+                                placeholder="Enter your email"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                className="w-full bg-black text-white p-2 rounded hover:bg-gray-800"
+                                disabled={loading}
+                            >
+                                {loading ? "Sending..." : "Send Reset Link"}
+                            </button>
+                        </form>
+
+                        {resetMessage && <p className="mt-3 text-center text-sm text-gray-700">{resetMessage}</p>}
+
+                        <button onClick={() => setIsModalOpen(false)} className="mt-4 w-full text-gray-600 hover:underline">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

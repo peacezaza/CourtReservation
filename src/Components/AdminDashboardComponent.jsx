@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MoreVertical } from 'lucide-react';
 import axios from 'axios';
-import { Icon } from "@iconify/react";
+
 
 const SearchableTable = () => {
     const [data, setData] = useState([]);
@@ -17,7 +17,7 @@ const SearchableTable = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`http://localhost:3000/exchange_point?search=${searchTerm}`);
+            const { data } = await axios.get(`http://localhost:3000/getExchange_point?search=${searchTerm}`);
             setData(data);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -65,12 +65,14 @@ const SearchableTable = () => {
     };
 
     const closeModal = () => {
+        setCustomLink("");
         setSelectedItem(null);
     };
 
 
 
     const handleSendLink = async () => {
+        console.log(selectedItem.owner_phone_number);
         if (!selectedItem) {
             alert("เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ใช้");
             return;
@@ -85,22 +87,29 @@ const SearchableTable = () => {
             // เรียก API แลกเปลี่ยน Voucher
             const response = await axios.post("http://localhost:3000/redeem_voucher", {
                 voucher: customLink,
-                phone: "0894042414",
+                phone: selectedItem.owner_phone_number,
             });
 
             if (response.data.success) {
                 const amount = response.data.amount; // ดึงจำนวนเงินที่ได้รับ
                 const user_id = selectedItem.user_id;
 
-                // ส่ง Notification พร้อมจำนวนเงิน
-                await axios.post("http://localhost:3000/notifications", {
+
+
+                await axios.post("http://localhost:3000/addNotifications", {
                     user_id,
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString(),
                     notification: `You have received ${amount} THB for the exchange transaction. Thank you very much for using our service.`,
                 });
 
                 alert("Voucher redeemed successfully!");
-                setCustomLink("");
+                await axios.delete("http://localhost:3000/deleteExchange_point", {
+                    data: { user_id }
+                });
+
                 closeModal();
+                fetchData();
             } else {
                 alert(`Failed: ${response.data.message}`);
             }
@@ -127,7 +136,7 @@ const SearchableTable = () => {
                     <div className="relative flex-grow mr-2">
                         <input
                             type="text"
-                            placeholder="Stadium name"
+                            placeholder="Search Name / Number"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -214,12 +223,21 @@ const SearchableTable = () => {
                     <div className="bg-white p-6 rounded-lg w-120">
                         <div className="flex justify-between items-center">
 
-                            <h2 className="text-xl font-semibold">{selectedItem.owner_name}</h2>
+                            <h1
+                                className="text-xl font-semibold">{selectedItem.owner_first_name} {selectedItem.owner_last_name} |  {selectedItem.owner_phone_number ? selectedItem.owner_phone_number.replace(/\d(?=\d{4})/g, "*") : "N/A"}
+
+                            </h1>
+
+
+
+
+
                             <button onClick={closeModal} className="text-gray-500">✖</button>
                         </div>
 
                         <div className="flex items-center space-x-4">
                             {/* รูปภาพอยู่ด้านซ้าย */}
+
                             <img src="/truemoney_logo.jpg" alt="home" className="w-50 h-32" />
 
                             {/* ส่วนด้านขวา (Point + Input + Button) */}
@@ -238,16 +256,8 @@ const SearchableTable = () => {
                                     />
                                     <button className="bg-blue-500 text-white px-3 py-1 rounded" onClick={handleSendLink}>SEND</button>
                                 </div>
-
-
-
-
-
                             </div>
                         </div>
-
-
-
                     </div>
                 </div>
             )}

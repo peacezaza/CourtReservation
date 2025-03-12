@@ -1,6 +1,6 @@
 
 
-export default function Schedule({}) {
+export default function Schedule() {
     return (
         <div></div>
     )

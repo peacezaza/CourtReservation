@@ -8,24 +8,48 @@ import { jwtDecode } from "jwt-decode";
 import ReviewComponent from "./ReviewComponent.jsx";
 import UserAccountComponent from "./UserAccountComponent.jsx"
 import NotificationComponent from "./NotificationComponent.jsx";
+import axios from "axios";
 
 export default function DashboardComponent({setIsFacility}) {
     const [money, setMoney] = useState(0)
+    const [ firstName, setFirstName] = useState("")
 
 
     const dataOptions = ["Weekly", "Monthly", "Yearly"];
     const defaultDataOption = dataOptions[0];
     const [selectedOption, setSelectedOption] = useState(defaultDataOption);
+    const [ overview, setOverview ] = useState(0)
+    const [ locationDetails, setStadiumOverview ] = useState([])
 
     let date = new Date();
     const navigate = useNavigate();
 
+    // const overview =
+    //     {total_amount : 2000, total_reservations : 13, active_location : 2, utilizationRate : "22%"}
+
+
     useEffect(() =>{
         const token = localStorage.getItem('token');
         const decoded = jwtDecode(token)
+        // console.log(decoded.userData)
+        setFirstName(decoded.userData.first_name)
+        setFirstName(decoded.userData.first_name)
         setMoney(decoded.userData.point);
 
-    })
+        axios.get("http://localhost:3000/owner/getDashboard", {
+            headers: { 'Authorization': `Bearer ${token}` },
+            params: { period: "weekly" }
+
+        }).then((response) => {
+            // console.log(response.data.stadiumdata);
+            setOverview(response.data.data);
+            // setStadiumOverview(response.data.stadiumdata)
+            setStadiumOverview(response.data.stadiumdata || []);
+        })
+
+
+        // console.log("stadium Overview : ", stadiumOverview)
+    }, [])
 
 
     const [isOpenMenuAccount, setIsOpenMenuAccount] = useState(false);
@@ -53,33 +77,29 @@ export default function DashboardComponent({setIsFacility}) {
         setOpenUserAccount(prev => !prev); // Trigger state change on button click
     }
 
-    useEffect(() => {
-
-    })
 
 
+    // const locationDetails = [{
+    //     "Location": "Downtown Arena",
+    //     "Revenue": 5000,
+    //     "Booking": 120,
+    //     "Utilization_Rate": 85
+    // },
+    //     {
+    //         "Location": "Downtown Arena",
+    //         "Revenue": 5000,
+    //         "Booking": 120,
+    //         "Utilization_Rate": 85
+    //     },
+    //     {
+    //         "Location": "Downtown Arena",
+    //         "Revenue": 5000,
+    //         "Booking": 120,
+    //         "Utilization_Rate": 85
+    //     }
+    // ]
 
-    const locationDetails = [{
-        "Location": "Downtown Arena",
-        "Revenue": 5000,
-        "Booking": 120,
-        "Utilization_Rate": 85
-    },
-        {
-            "Location": "Downtown Arena",
-            "Revenue": 5000,
-            "Booking": 120,
-            "Utilization_Rate": 85
-        },
-        {
-            "Location": "Downtown Arena",
-            "Revenue": 5000,
-            "Booking": 120,
-            "Utilization_Rate": 85
-        }
-    ]
-
-    const tableHeader = Object.keys(locationDetails[0])
+    const tableHeader = locationDetails && locationDetails.length > 0 ? Object.keys(locationDetails[0]) : []
 
     const options = {
         chart: {
@@ -136,10 +156,16 @@ export default function DashboardComponent({setIsFacility}) {
         setSelectedOption(option.value);
         // Add any additional logic you need when a selection changes
         console.log(`Selected: ${option.value}`);
-
-        // Example: If you need to filter data based on selection
+        const token = localStorage.getItem("token")
         if (option.value === "Weekly") {
-            // Handle weekly data
+            axios.get("http://localhost:3000/owner/getDashboard", {
+                headers: { 'Authorization': `Bearer ${token}` },
+                params: { period: "weekly" }
+
+            }).then((response) => {
+                console.log(response.data.data);
+                setOverview(response.data.data);
+            })
         } else if (option.value === "Monthly") {
             // Handle monthly data
         } else if (option.value === "Yearly") {
@@ -147,7 +173,7 @@ export default function DashboardComponent({setIsFacility}) {
         }
     };
     return (
-        <div className="grid grid-rows-10 h-full overflow-x-auto">
+        <div className="grid grid-rows-10 h-full overflow-x-auto overflow-y-hidden5">
             <div className="bg-white row-span-1 ">
                 <div className="flex flex-col gap-3">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
@@ -200,7 +226,7 @@ export default function DashboardComponent({setIsFacility}) {
                                         <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" />
                                         </svg>
-                                        <span className="font-semibold">Tanapat</span>
+                                        <span className="font-semibold">{firstName}</span>
                                     </div>
                                     <hr />
                                     <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2" onClick={() => handleOpenUserAccount(null)}>
@@ -258,7 +284,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
                             <div className="flex flex-row gap-3 items-start">
                                 <Icon icon="noto:coin" className="w-9 h-9" />
-                                <p className="font-semibold text-2xl">2000</p>
+                                <p className="font-semibold text-2xl">{overview.total_amount}</p>
                             </div>
                         </div>
 
@@ -269,7 +295,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
 
                             <div className="font-semibold text-2xl items-center">
-                                13
+                                {overview.total_reservations}
                             </div>
 
                         </div>
@@ -281,7 +307,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
 
                             <div className="font-semibold text-2xl items-center">
-                                2
+                                {overview.active_location}
                             </div>
 
                         </div>
@@ -293,7 +319,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
 
                             <div className="font-semibold text-2xl items-center">
-                                30%
+                                {overview.utilizationRate}
                             </div>
 
                         </div>

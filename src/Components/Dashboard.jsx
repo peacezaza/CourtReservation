@@ -9,6 +9,7 @@ import BookingComponent from "./BookingComponent.jsx";
 import FacilityComponent from "./FacilityComponent.jsx";
 import TransactionComponent from "./TransactionComponent.jsx";
 import FacilityDetails from "./FacilityDetails.jsx";
+import Schedule from "./Schedule.jsx";
 
 
 export default function Dashboard() {
@@ -18,38 +19,45 @@ export default function Dashboard() {
     const [ isTransactionOpen, setIsTransactionOpen] = useState(false)
     const [ isFacility, setIsFacility ] = useState(false);
     const [ stadiumSelect, setStadiumSelect ] = useState();
+    const [ isSchedule, setSchedule ] = useState(false);
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
 
-        if(token){
-            // console.log(token)
+        if (token) {
             const decoded = jwtDecode(token);
-            // console.log(decoded.exp);
-            const currentTime = Date.now() / 1000
-            // console.log(currentTime)
-            // console.log("Current Time (Local):", new Date().toLocaleString());
-            // const expDate = new Date(decoded.exp * 1000);  // Convert UNIX timestamp to Date
-            // console.log("EXP Time (Local):", expDate.toLocaleString());
-            if(decoded.exp < currentTime){
+            const currentTime = Date.now() / 1000;
+
+            if (decoded.exp < currentTime) {
                 localStorage.removeItem("token");
                 navigate("/login");
             }
-        }else{
+        } else {
             navigate("/login");
         }
 
+        // console.log("isSchedule before updates:", isSchedule);
+        // console.log(isFacility)
         if (isFacility) {
             setIsFacilityOpen(false);
-            setIsDashboardOpen(false)
-            setIsFacilityOpen(false)
-            setIsBookingOpen(false)
-            // console.log(stadiumSelect)
+            setIsDashboardOpen(false);
+            setIsBookingOpen(false);
+            // setSchedule(false);
+        }
+        if (isSchedule) {
+            setIsFacilityOpen(false);
+            setIsDashboardOpen(false);
+            setIsBookingOpen(false);
+            setIsFacility(false);
         }
 
-    })
+        console.log("isSchedule after updates:", isSchedule);
+        console.log("Facility Detail is: ", isFacility)
+
+    }); // ✅ Now it runs ONLY when these states change
+
 
 
     const handleNavClick = (event, param) => {
@@ -75,6 +83,7 @@ export default function Dashboard() {
             setIsBookingOpen(false)
             setIsTransactionOpen(false)
             setIsFacility(false)
+            setSchedule(false)
         }
         else if (param == "Transaction"){
             setIsDashboardOpen(false)
@@ -89,7 +98,13 @@ export default function Dashboard() {
             setIsDashboardOpen(false)
             setIsFacilityOpen(false)
             setIsBookingOpen(false)
+        }else if(isSchedule){
+            setIsFacilityOpen(false);
+            setIsDashboardOpen(false)
+            setIsFacilityOpen(false)
+            setIsBookingOpen(false)
         }
+
     }
 
     // setIsFacility(true)
@@ -151,7 +166,8 @@ export default function Dashboard() {
                 {isFacilityOpen &&
                     <FacilityComponent setIsFacility={setIsFacility} setStadiumSelect={setStadiumSelect}/>}
                 {isTransactionOpen && <TransactionComponent/>}
-                {isFacility && <FacilityDetails stadiumSelect={stadiumSelect}/>}
+                {isFacility && <FacilityDetails stadiumSelect={stadiumSelect} setSchedule={setSchedule}/>}
+                {isSchedule && <Schedule />}
             </div>
         </div>
     )

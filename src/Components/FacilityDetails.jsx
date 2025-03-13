@@ -148,7 +148,7 @@ function StatusDropdown({ court, updateCourtStatus, setIsOpenOverlay, selectedPe
     );
 }
 
-export default function FacilityDetails({ stadiumSelect }) {
+export default function FacilityDetails({ stadiumSelect, setSchedule }) {
 
     const [isOpenOverlay, setIsOpenOverlay] = useState(false)
     const [point, setPoint] = useState(0)
@@ -493,6 +493,11 @@ export default function FacilityDetails({ stadiumSelect }) {
     // console.log(paginatedCourts);
 
 
+    const handleCheckSchedule = () =>{
+        setSchedule(true)
+        console.log("CLICK SCHEDULE")
+    }
+
 
     return (
         <div className="grid grid-rows-10 h-full overflow-x-auto">
@@ -529,7 +534,7 @@ export default function FacilityDetails({ stadiumSelect }) {
                         <div></div>
                         <div>{formettedDate.toString()}</div>
                         <div className="">
-                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4">Check Schedule
+                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4" onClick={handleCheckSchedule}>Check Schedule
                             </button>
                         </div>
                     </div>

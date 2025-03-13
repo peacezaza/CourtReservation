@@ -8,24 +8,91 @@ import { jwtDecode } from "jwt-decode";
 import ReviewComponent from "./ReviewComponent.jsx";
 import UserAccountComponent from "./UserAccountComponent.jsx"
 import NotificationComponent from "./NotificationComponent.jsx";
+import axios from "axios";
 
 export default function DashboardComponent({setIsFacility}) {
     const [money, setMoney] = useState(0)
+    const [ firstName, setFirstName] = useState("")
 
 
     const dataOptions = ["Weekly", "Monthly", "Yearly"];
     const defaultDataOption = dataOptions[0];
     const [selectedOption, setSelectedOption] = useState(defaultDataOption);
+    const [ overview, setOverview ] = useState(0)
+    const [ locationDetails, setStadiumOverview ] = useState([])
+    const [ statisticData, setStatisticData ] = useState()
+    const [options, setOptions] = useState(null); // Use state for options
+    const [series, setSeries] = useState(null);
+    const [ review, setReview ] = useState([])
+    const [ fullReview, setFullReview ] = useState([])
+
 
     let date = new Date();
     const navigate = useNavigate();
 
-    useEffect(() =>{
+    // const overview =
+    //     {total_amount : 2000, total_reservations : 13, active_location : 2, utilizationRate : "22%"}
+
+
+    useEffect(() => {
         const token = localStorage.getItem('token');
-        const decoded = jwtDecode(token)
+        if (!token) return; // Early return if no token
+
+        const decoded = jwtDecode(token);
+        // console.log(decoded);
+        setFirstName(decoded.userData.first_name);
         setMoney(decoded.userData.point);
 
-    })
+        axios
+            .get("http://localhost:3000/owner/getDashboard", {
+                headers: { 'Authorization': `Bearer ${token}` },
+                params: { period: "weekly" }
+            })
+            .then((response) => {
+                setOverview(response.data.data || {});
+                setStadiumOverview(response.data.stadiumdata || []);
+                setReview(response.data.review || []);
+                setFullReview(response.data.fullReview|| []);
+                const stats = response.data.statistics || []; // Use response data directly
+                setStatisticData(stats); // Set for later use if needed
+
+                // Process statistics data
+                const data = new Array(7).fill(0);
+                if (stats && Array.isArray(stats)) {
+                    stats.forEach(entry => {
+                        const localDate = new Date(entry.date);
+                        const dayIndex = localDate.getDay(); // 0 = SUN, 1 = MON, ..., 6 = SAT
+                        data[dayIndex] = entry.total_reservations || 0; // Default to 0 if undefined
+                    });
+                }
+
+                // Set chart options and series
+                setOptions({
+                    chart: {
+                        type: 'bar',
+                    },
+                    colors: ['#57534E'],
+                    xaxis: {
+                        categories: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: '50%',
+                        },
+                    },
+                });
+
+                setSeries([
+                    {
+                        name: 'Occupancy',
+                        data: data,
+                    },
+                ]);
+            })
+            .catch((error) => {
+                console.error('Error fetching dashboard data:', error);
+            });
+    }, []);
 
 
     const [isOpenMenuAccount, setIsOpenMenuAccount] = useState(false);
@@ -53,73 +120,10 @@ export default function DashboardComponent({setIsFacility}) {
         setOpenUserAccount(prev => !prev); // Trigger state change on button click
     }
 
-    useEffect(() => {
-
-    })
 
 
+    const tableHeader = locationDetails && locationDetails.length > 0 ? Object.keys(locationDetails[0]) : []
 
-    const locationDetails = [{
-        "Location": "Downtown Arena",
-        "Revenue": 5000,
-        "Booking": 120,
-        "Utilization_Rate": 85
-    },
-        {
-            "Location": "Downtown Arena",
-            "Revenue": 5000,
-            "Booking": 120,
-            "Utilization_Rate": 85
-        },
-        {
-            "Location": "Downtown Arena",
-            "Revenue": 5000,
-            "Booking": 120,
-            "Utilization_Rate": 85
-        }
-    ]
-
-    const tableHeader = Object.keys(locationDetails[0])
-
-    const options = {
-        chart: {
-            type: "bar",
-        },
-        colors: ["#000"],
-        xaxis: {
-            categories: ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: "50%", // Adjust bar width (values: "10%" to "100%")
-            },
-        },
-    };
-
-    const series = [
-        {
-            name: "Occupancy",
-            data: [30, 40, 55, 70, 91, 30, 55, 85, 63, 10, 40, 85],
-        },
-    ];
-
-    const review = [
-        {
-            "Name": "Mark",
-            "Review": "Food could be better",
-            "Stadium": "Areana"
-        },
-        {
-            "Name": "Christian",
-            "Review": "Facilities are not enough for amount paid.",
-            "Stadium": "Ryummit"
-        },
-        {
-            "Name": "Alexander",
-            "Review": "Good.",
-            "Stadium": "Areana"
-        }
-    ]
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -136,18 +140,159 @@ export default function DashboardComponent({setIsFacility}) {
         setSelectedOption(option.value);
         // Add any additional logic you need when a selection changes
         console.log(`Selected: ${option.value}`);
-
-        // Example: If you need to filter data based on selection
+        const token = localStorage.getItem("token")
         if (option.value === "Weekly") {
-            // Handle weekly data
+            axios.get("http://localhost:3000/owner/getDashboard", {
+                headers: { 'Authorization': `Bearer ${token}` },
+                params: { period: "weekly" }
+
+            }).then((response) => {
+                // console.log(response.data.data);
+                // console.log(response.data.statistics)
+                setOverview(response.data.data);
+                setStadiumOverview(response.data.stadiumdata || []);
+                const stats = response.data.statistics || [];
+                setStatisticData(stats);
+
+                const data = new Array(7).fill(0);
+                if (stats && Array.isArray(stats)) {
+                    stats.forEach(entry => {
+                        const localDate = new Date(entry.date);
+                        const dayIndex = localDate.getDay();
+                        data[dayIndex] = entry.total_reservations || 0;
+                    });
+                }
+
+                // Set chart options and series
+                setOptions({
+                    chart: {
+                        type: 'bar',
+                    },
+                    colors: ['#57534E'],
+                    xaxis: {
+                        categories: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: '50%',
+                        },
+                    },
+                });
+
+                setSeries([
+                    {
+                        name: 'Occupancy',
+                        data: data,
+                    },
+                ]);
+            })
         } else if (option.value === "Monthly") {
-            // Handle monthly data
+            axios.get("http://localhost:3000/owner/getDashboard", {
+                headers: { 'Authorization': `Bearer ${token}` },
+                params: { period: "monthly" }
+
+            }).then((response) => {
+                console.log(response.data.data);
+                console.log(response.data.statistics)
+                setOverview(response.data.data);
+                setStadiumOverview(response.data.stadiumdata || []);
+                setStatisticData(response.data.statistics || []);
+
+                const stats = response.data.statistics || [];
+                setStatisticData(stats);
+
+                const weeklyData = new Array(4).fill(0);
+
+                if (stats && typeof stats === 'object') {
+                    weeklyData[0] = stats.week1 || 0;
+                    weeklyData[1] = stats.week2 || 0;
+                    weeklyData[2] = stats.week3 || 0;
+                    weeklyData[3] = stats.week4 || 0;
+                }
+                setOptions({
+                    chart: {
+                        type: 'bar', // This is what the chart library needs
+                    },
+                    colors: ['#57534E'],
+                    xaxis: {
+                        categories: [
+                            "Week1", "Week2", "Week3", "Week4"
+                        ],
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: '50%',
+                        },
+                    },
+                });
+
+                setSeries([
+                    {
+                        name: 'Occupancy',
+                        data: weeklyData,
+                    },
+                ]);
+            })
         } else if (option.value === "Yearly") {
-            // Handle yearly data
+            axios.get("http://localhost:3000/owner/getDashboard", {
+                headers: { 'Authorization': `Bearer ${token}` },
+                params: { period: "yearly" }
+
+            }).then((response) => {
+                console.log(response.data.data);
+                console.log(response.data.statistics)
+                setOverview(response.data.data);
+                setStadiumOverview(response.data.stadiumdata || []);
+                const stats = response.data.statistics || [];
+                setStatisticData(stats);
+
+// Initialize an array for 12 months
+                const monthlyData = new Array(12).fill(0);
+
+                if (stats && typeof stats === 'object') {
+                    monthlyData[0] = stats.Jan || 0;
+                    monthlyData[1] = stats.Feb || 0;
+                    monthlyData[2] = stats.Mar || 0;
+                    monthlyData[3] = stats.Apr || 0;
+                    monthlyData[4] = stats.May || 0;
+                    monthlyData[5] = stats.Jun || 0;
+                    monthlyData[6] = stats.Jul || 0;
+                    monthlyData[7] = stats.Aug || 0;
+                    monthlyData[8] = stats.Sep || 0;
+                    monthlyData[9] = stats.Oct || 0;
+                    monthlyData[10] = stats.Nov || 0;
+                    monthlyData[11] = stats.Dec || 0;
+                }
+
+                setOptions({
+                    chart: {
+                        type: 'bar', // Chart type
+                    },
+                    colors: ['#57534E'],
+                    xaxis: {
+                        categories: [
+                            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                        ],
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: '50%',
+                        },
+                    },
+                });
+
+                setSeries([
+                    {
+                        name: 'Occupancy',
+                        data: monthlyData, // Use dynamic monthly data from statistics
+                    },
+                ]);
+            })
         }
     };
     return (
-        <div className="grid grid-rows-10 h-full overflow-x-auto">
+        <div className="grid grid-rows-10 h-full overflow-x-auto overflow-y-hidden">
             <div className="bg-white row-span-1 ">
                 <div className="flex flex-col gap-3">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
@@ -200,7 +345,7 @@ export default function DashboardComponent({setIsFacility}) {
                                         <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" />
                                         </svg>
-                                        <span className="font-semibold">Tanapat</span>
+                                        <span className="font-semibold">{firstName}</span>
                                     </div>
                                     <hr />
                                     <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2" onClick={() => handleOpenUserAccount(null)}>
@@ -258,7 +403,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
                             <div className="flex flex-row gap-3 items-start">
                                 <Icon icon="noto:coin" className="w-9 h-9" />
-                                <p className="font-semibold text-2xl">2000</p>
+                                <p className="font-semibold text-2xl">{overview.total_amount ?? 0}</p>
                             </div>
                         </div>
 
@@ -269,7 +414,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
 
                             <div className="font-semibold text-2xl items-center">
-                                13
+                                {overview.total_reservations}
                             </div>
 
                         </div>
@@ -281,7 +426,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
 
                             <div className="font-semibold text-2xl items-center">
-                                2
+                                {overview.active_location}
                             </div>
 
                         </div>
@@ -293,7 +438,7 @@ export default function DashboardComponent({setIsFacility}) {
                             </div>
 
                             <div className="font-semibold text-2xl items-center">
-                                30%
+                                {overview.utilizationRate}
                             </div>
 
                         </div>
@@ -301,7 +446,7 @@ export default function DashboardComponent({setIsFacility}) {
                 </div>
                 <div className="row-span-3 bg-white w-[90%] h-full place-self-center rounded-xl">
                     <div
-                        className="w-full h-full overflow-y-auto overflow-x-auto bg-gray-50 p-6 rounded-lg shadow-sm scrollbar-thin"
+                        className="w-full h-full overflow-y-auto overflow-x-auto bg-gray-50 p-2  rounded-lg shadow-sm scrollbar-thin"
                         style={{
                             scrollbarWidth: 'thin',
                             scrollbarColor: '#94a3b8 #e2e8f0'
@@ -319,21 +464,29 @@ export default function DashboardComponent({setIsFacility}) {
                             ))}
                             </thead>
                             <tbody className="text-gray-700 text-lg">
-                            {locationDetails.map((row, rowIndex) => (
-                                <tr
-                                    className="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-150 ease-in-out"
-                                    key={rowIndex}
-                                >
-                                    {Object.keys(row).map((key, index) => (
-                                        <td
-                                            className="py-4 px-6 text-left"
-                                            key={index}
-                                        >
-                                            {row[key]}
-                                        </td>
-                                    ))}
+                            {locationDetails.length === 0 ? (
+                                <tr>
+                                    <td colSpan="100%" className="py-4 px-6 text-center text-xl font-bold">
+                                        No Stadium
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                locationDetails.map((row, rowIndex) => (
+                                    <tr
+                                        className="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+                                        key={rowIndex}
+                                    >
+                                        {Object.keys(row).map((key, index) => (
+                                            <td
+                                                className="py-4 px-6 text-left"
+                                                key={index}
+                                            >
+                                                {row[key]}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
                             </tbody>
                         </table>
                     </div>
@@ -341,7 +494,18 @@ export default function DashboardComponent({setIsFacility}) {
                 <div className="row-span-3 w-[90%] h-full place-self-center rounded-xl grid grid-cols-5 gap-6">
                     <div className="col-span-3 bg-white rounded-xl flex flex-col px-4">
                         <div className="text-2xl"><p>Occupancy Statistics</p></div>
-                        <div><Chart options={options} series={series} type="bar" height={250} width="95%" className=""/>
+                        <div>
+                            {options && series ? (
+                                <Chart
+                                    options={options}
+                                    series={series}
+                                    type="bar"
+                                    height={250}
+                                    width="95%"
+                                />
+                            ) : (
+                                <p>Loading chart...</p>
+                            )}
                         </div>
                     </div>
                     <div className="col-span-2 bg-white rounded-xl flex-col">
@@ -354,15 +518,29 @@ export default function DashboardComponent({setIsFacility}) {
                         </div>
                         <div>
                             {review.map((row, rowIndex) => (
-                                <div key={rowIndex} className="flex flex-row justify-between border-b-2 h-[5rem] px-4">
-                                    <div className="flex flex-col"><p>{row.Name}</p><p>{row.Review}</p></div>
-                                    <div>{row.Stadium}</div>
+                                <div
+                                    key={rowIndex}
+                                    className="flex flex-row justify-between items-center border-b-2 border-gray-200 h-[6rem] px-6 py-4 hover:bg-gray-50 transition-colors duration-200"
+                                >
+                                    {/* Left Section: User and Review Comment */}
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-lg font-semibold text-gray-800">
+                                            {(row.Name) ? row.Name : "Anonymous"}
+                                        </p>
+                                        <p className="text-sm text-gray-600 italic">{row.Review}</p>
+                                    </div>
+
+                                    {/* Right Section: Stadium Name */}
+                                    <div className="text-right">
+                                        <p className="text-md font-medium text-blue-600">{row.name}</p>
+                                        <p className="text-xs text-gray-500">{row.Stadium}</p>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
-                {OpenReview && <ReviewComponent onClose={() => setOpenReview(null)}/>}
+                {OpenReview && <ReviewComponent onClose={() => setOpenReview(null)} fullReview={fullReview} />}
                 {OpenNotification && <NotificationComponent onClose={() => setOpenNotification(null)} />}
                 {OpenUserAccount && <UserAccountComponent onClose={() => setOpenUserAccount(null)} />}
             </div>

@@ -4,12 +4,14 @@ import StadiumDetailsModal from "./StadiumDetailsModal";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import axios from "axios";
+import EditStadiumOverlay from "./EditStadiumOverlay";
 
-export default function StadiumCard({id, name, location, rating, pictures, availability, setIsFacility, setStadiumSelect}) {
+export default function StadiumCard({ id, name, location, rating, pictures, availability, setIsFacility, setStadiumSelect }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isUnderMaintenance, setIsUnderMaintenance] = useState(!availability);
     const menuRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isOpenEditOverlay, setIsOpenEditOverlay] = useState(false)
     const stadium = { id, name, location, rating, pictures, availability: isUnderMaintenance };
 
     // ปิดเมนูเมื่อคลิกข้างนอก
@@ -27,7 +29,7 @@ export default function StadiumCard({id, name, location, rating, pictures, avail
         setIsFacility(false); // ทำการปิด modal
     };
 
-    const handleClick =() =>{
+    const handleClick = () => {
         setIsFacility(true)
         setStadiumSelect(stadium)
         console.log("Click")
@@ -53,12 +55,16 @@ export default function StadiumCard({id, name, location, rating, pictures, avail
             return updatedStatus; // Update the state
         });
     };
+    const handleEditStadium = (event) => {
+        console.log("Edit Stadium is Clicked\n")
+        setIsOpenEditOverlay(true)
+    }
 
 
     return (
         <div className="relative rounded-2xl shadow-lg overflow-hidden w-80 cursor-pointer">
             <div className="h-48 w-full relative" onClick={handleClick}>
-                <img src={stadium.pictures[0]} alt={name} className="w-full h-full object-cover"/>
+                <img src={stadium.pictures[0]} alt={name} className="w-full h-full object-cover" />
                 {isUnderMaintenance && (
                     <div className="absolute inset-0 bg-yellow-300 bg-opacity-70 flex justify-center items-center">
                         <Icon icon="mdi:tools" className="w-20 h-20 text-yellow-700" />
@@ -70,11 +76,11 @@ export default function StadiumCard({id, name, location, rating, pictures, avail
                 <p className="text-gray-500 text-sm">Entire Stadium · 4 courts</p>
                 <h3 className="font-semibold text-lg">{name}</h3>
                 <div className="flex items-center text-gray-500 text-sm mt-1">
-                    <Icon icon="mdi:map-marker" className="w-5 h-5 mr-1"/>
+                    <Icon icon="mdi:map-marker" className="w-5 h-5 mr-1" />
                     {location}
                 </div>
                 <div className="flex items-center mt-2">
-                    <Icon icon="mdi:star" className="w-5 h-5 text-yellow-500"/>
+                    <Icon icon="mdi:star" className="w-5 h-5 text-yellow-500" />
                     <span className={`ml-1 ${availability ? "text-red-500" : ""}`}>{rating}</span>
                     <span className="text-gray-400 ml-1">(122)</span>
                 </div>
@@ -86,7 +92,7 @@ export default function StadiumCard({id, name, location, rating, pictures, avail
             <div className="absolute bottom-4 right-4">
                 <Menu as="div" className="relative inline-block text-left">
                     <Menu.Button className="cursor-pointer">
-                        <Icon icon="mdi:dots-vertical" className="w-6 h-6 text-gray-600"/>
+                        <Icon icon="mdi:dots-vertical" className="w-6 h-6 text-gray-600" />
                     </Menu.Button>
 
                     <Transition
@@ -112,11 +118,11 @@ export default function StadiumCard({id, name, location, rating, pictures, avail
                                     )}
                                 </Menu.Item>
                                 <Menu.Item>
-                                    {({active}) => (
+                                    {({ active }) => (
                                         <button
                                             className={`block w-full text-left px-4 py-2 text-sm ${active ? "bg-orange-100 text-orange-600" : "text-orange-600"
                                             }`}
-                                            // onClick={handleAddStadium}
+                                            onClick={handleEditStadium}
                                         >
                                             Edit
                                         </button>
@@ -127,7 +133,10 @@ export default function StadiumCard({id, name, location, rating, pictures, avail
                     </Transition>
                 </Menu>
             </div>
-            {isModalOpen && <StadiumDetailsModal stadium={stadium} onClose={handleClose}/>}
+            {isModalOpen && <StadiumDetailsModal stadium={stadium} onClose={handleClose} />}
+            {isOpenEditOverlay && <div className="flex justify-center items-center h-full w-full">
+                <EditStadiumOverlay setIsOpenEditOverlay={setIsOpenEditOverlay} />
+            </div>}
         </div>
     );
 }

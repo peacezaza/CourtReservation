@@ -4,15 +4,13 @@ import { useState } from "react";
 import { useEffect } from "react";
 import BookingDetail from "./BookingDetail.jsx";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+
 import ReviewComponent from "./ReviewComponent.jsx";
 import UserAccountComponent from "./UserAccountComponent.jsx"
 import NotificationComponent from "./NotificationComponent.jsx";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function BookingComponent({setIsFacility}) {
-    const [money, setMoney] = useState(0)
-
+export default function BookingComponent({ setIsFacility }) {
     const [isOpenOverlay, setIsOpenOverlay] = useState(false)
     const [filterStatus, setFilterStatus] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +27,10 @@ export default function BookingComponent({setIsFacility}) {
 
     const navigate = useNavigate();
 
+
+    const handleOpenReview = () => {
+        setOpenReview(prev => !prev); // Trigger state change on button click
+    }
 
     const handleOpenNotification = () => {
         setOpenNotification(prev => !prev); // Trigger state change on button click
@@ -78,9 +80,6 @@ export default function BookingComponent({setIsFacility}) {
     const [reservations, setReservations] = useState([]);
     useEffect(() => {
         const token = localStorage.getItem("token");
-        const decoded = jwtDecode(token)
-        setMoney(decoded.userData.point);
-
         axios.get("http://localhost:3000/getReservationData", {
             headers: { 'Authorization': `Bearer ${token}` }
         }).then((response) => {
@@ -92,7 +91,10 @@ export default function BookingComponent({setIsFacility}) {
                 return { ...res, date: reservationDatePart }; // Update date format
             });
 
+            console.log(formattedReservations)
+
             setReservations(formattedReservations);
+
         }).catch((error) => {
             console.error("Error fetching stadium data:", error);
         });
@@ -127,34 +129,34 @@ export default function BookingComponent({setIsFacility}) {
         if (bookingToCancel) {
             console.log(bookingToCancel)
             setReservations(prev =>
-                prev.map(res =>{
+                prev.map(res => {
                     return res.id === bookingToCancel.id ? { ...res, status: "cancelled" } : res
                 })
             );
             setIsCancelOverlayOpen(false);
             setBookingToCancel(null);
-            try{
+            try {
                 console.log("TEST")
                 const token = localStorage.getItem("token")
                 const date = new Date(bookingToCancel.date).toISOString().split('T')[0];
                 const data = {
-                    "court_id" : bookingToCancel.court_id,
-                    "reservation_id" : bookingToCancel.id,
-                    "amount" : bookingToCancel.amount,
-                    "owner_id" : bookingToCancel.owner_id,
-                    "user_id" : bookingToCancel.user_id,
-                    "date" : date,
-                    "start_time" : bookingToCancel.start_time,
-                    "end_time" : bookingToCancel.end_time,
-                    "status" : "cancelled"
+                    "court_id": bookingToCancel.court_id,
+                    "reservation_id": bookingToCancel.id,
+                    "amount": bookingToCancel.amount,
+                    "owner_id": bookingToCancel.owner_id,
+                    "user_id": bookingToCancel.user_id,
+                    "date": date,
+                    "start_time": bookingToCancel.start_time,
+                    "end_time": bookingToCancel.end_time,
+                    "status": "cancelled"
                 }
                 axios.put("http://localhost:3000/updateReservationStatus", data, {
-                    headers: {'Authorization': `Bearer ${token}`}
+                    headers: { 'Authorization': `Bearer ${token}` }
                 }).then((response) => {
                     console.log(response)
                 })
             }
-            catch (e){
+            catch (e) {
                 console.log(e)
             }
         }
@@ -163,18 +165,51 @@ export default function BookingComponent({setIsFacility}) {
 
     };
 
-    const matchesStatus =
-        filterStatus === "All" ||
-        (filterStatus === "Ongoing" && res.status === "confirmed") ||
-        (filterStatus === "Completed" && res.status === "cancelled");
+    // Current date (automatically set to current system date and time)
+    const currentDate = new Date();
 
-
+    // Function to parse booking date and time in 24-hour format
+    const parseBookingDateTime = (dateStr, timeStr) => {
+        const [startTime] = timeStr.split(" - "); // Split if there's an end time
+        const [hours, minutes] = startTime.split(":"); // Split hours and minutes
+        const hourNum = parseInt(hours);
+        return new Date(`${dateStr} ${hourNum}:${minutes}:00`);
+    };
     const filteredReservations = reservations.filter(res => {
-        const matchesStatus = filterStatus === "All" || res.status === filterStatus;
-        const matchesSearch = res.name.toLowerCase().includes(searchTerm.toLowerCase()) || res.id.includes(searchTerm);
-        return matchesStatus && matchesSearch;
-    });
+        const bookingDateTime = parseBookingDateTime(res.date, res.time);
+        const matchesSearch =
+            res.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            res.id.includes(searchTerm);
 
+        if (filterStatus === "All") {
+            return matchesSearch;
+        }
+
+        if (filterStatus === "Ongoing") {
+            return (
+                res.status === "confirmed" &&
+                bookingDateTime >= currentDate &&
+                matchesSearch
+            );
+        }
+
+        if (filterStatus === "Completed") {
+            return (
+                (res.status === "cancelled" || bookingDateTime < currentDate) &&
+                matchesSearch
+            );
+        }
+
+        if (filterStatus === "confirmed") {
+            return res.status === "confirmed" && matchesSearch;
+        }
+
+        if (filterStatus === "cancelled") {
+            return res.status === "cancelled" && matchesSearch;
+        }
+
+        return false;
+    });
 
     useEffect(() => {
         setCurrentPage(1);
@@ -193,6 +228,7 @@ export default function BookingComponent({setIsFacility}) {
         }
     };
 
+    const money = 2000;
     let date = new Date();
 
     const formettedDate = new Intl.DateTimeFormat('en-US', {
@@ -222,7 +258,7 @@ export default function BookingComponent({setIsFacility}) {
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
                         <div className="flex flex-row space-x-2 items-center">
                             <div>
-                                <Icon icon="noto:coin" className="w-9 h-9"/>
+                                <Icon icon="noto:coin" className="w-9 h-9" />
                             </div>
 
                             <div>{money}</div>
@@ -237,7 +273,7 @@ export default function BookingComponent({setIsFacility}) {
                                      viewBox="0 0 24 24">
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
                                           strokeWidth="2"
-                                          d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z"/>
+                                          d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" />
                                 </svg>
                             </button>
                         </div>
@@ -270,26 +306,26 @@ export default function BookingComponent({setIsFacility}) {
                                         <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg"
                                              fill="currentColor" viewBox="0 0 24 24">
                                             <path
-                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"/>
+                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" />
                                         </svg>
                                         <span className="font-semibold">Tanapat</span>
                                     </div>
-                                    <hr/>
+                                    <hr />
                                     <button
                                         className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
                                         onClick={() => handleOpenUserAccount(null)}>
                                         <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg"
                                              fill="currentColor" viewBox="0 0 24 24">
                                             <path
-                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"/>
+                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" />
                                         </svg>
                                         <span>My Account</span>
                                     </button>
-                                    <hr/>
+                                    <hr />
                                     <button
                                         className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
                                         onClick={handleLogout}>
-                                        <Icon icon="material-symbols:logout" className="w-5 h-5 text-gray-600"/>
+                                        <Icon icon="material-symbols:logout" className="w-5 h-5 text-gray-600" />
                                         <span>Logout</span>
                                     </button>
 
@@ -336,7 +372,7 @@ export default function BookingComponent({setIsFacility}) {
                         ))}
 
                         <div className="relative flex items-center">
-                            <Icon icon="mdi:magnify" className="absolute left-3 w-5 h-5 text-gray-400"/>
+                            <Icon icon="mdi:magnify" className="absolute left-3 w-5 h-5 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Search by name or ID"
@@ -377,13 +413,13 @@ export default function BookingComponent({setIsFacility}) {
                                         {res.status === 'confirmed' ? (
                                             <button onClick={() => openCancelOverlay(res)}>
                                                 <Icon icon="mdi:trash-can-outline"
-                                                      className="w-5 h-5 text-red-500 cursor-pointer"/>
+                                                      className="w-5 h-5 text-red-500 cursor-pointer" />
                                             </button>
                                         ) : (
                                             <span className="w-5 h-5"></span> // Placeholder to maintain spacing
                                         )}
                                         <button onClick={() => handleSelectBooking(res)} className="ml-2">
-                                            <Icon icon="mdi:dots-vertical" className="w-5 h-5"/>
+                                            <Icon icon="mdi:dots-vertical" className="w-5 h-5" />
                                         </button>
                                     </div>
 
@@ -426,8 +462,8 @@ export default function BookingComponent({setIsFacility}) {
                     </div>
                 )}
 
-                {isOpenOverlay && <CreateBookingOverlay setIsOpenOverlay={setIsOpenOverlay}/>}
-                {selectedBooking && <BookingDetail booking={selectedBooking} onClose={() => setSelectedBooking(null)}/>}
+                {isOpenOverlay && <CreateBookingOverlay setIsOpenOverlay={setIsOpenOverlay} />}
+                {selectedBooking && <BookingDetail booking={selectedBooking} onClose={() => setSelectedBooking(null)} />}
                 {selectedBooking && (
                     <BookingDetail
                         booking={selectedBooking}

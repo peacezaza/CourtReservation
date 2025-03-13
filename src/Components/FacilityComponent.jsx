@@ -4,9 +4,6 @@ import {Icon} from "@iconify/react";
 import {useEffect, useState} from "react";
 import axios from "axios";
 
-
-
-
 export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
 
     const [ isOpenOverlay, setIsOpenOverlay ] = useState(false)

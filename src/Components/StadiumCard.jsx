@@ -16,9 +16,6 @@ export default function StadiumCard({ id, name, location, rating, pictures, avai
 
     // ปิดเมนูเมื่อคลิกข้างนอก
     useEffect(() => {
-        // console.log(stadium.pictures[0]);
-        console.log("isUnderMaintenance", isUnderMaintenance)
-        console.log("availability", availability)
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setMenuOpen(false);

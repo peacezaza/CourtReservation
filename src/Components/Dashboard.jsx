@@ -44,7 +44,6 @@ export default function Dashboard() {
             setIsFacilityOpen(false);
             setIsDashboardOpen(false);
             setIsBookingOpen(false);
-            // setSchedule(false);
         }
         if (isSchedule) {
             setIsFacilityOpen(false);
@@ -53,8 +52,6 @@ export default function Dashboard() {
             setIsFacility(false);
         }
 
-        console.log("isSchedule after updates:", isSchedule);
-        console.log("Facility Detail is: ", isFacility)
 
     }); // ✅ Now it runs ONLY when these states change
 
@@ -69,6 +66,7 @@ export default function Dashboard() {
             setIsBookingOpen(false)
             setIsTransactionOpen(false)
             setIsFacility(false)
+            setSchedule(false)
         }
         else if (param == "Booking"){
             setIsDashboardOpen(false)
@@ -76,6 +74,7 @@ export default function Dashboard() {
             setIsBookingOpen(true)
             setIsTransactionOpen(false)
             setIsFacility(false)
+            setSchedule(false)
         }
         else if (param == "Facility"){
             setIsDashboardOpen(false)
@@ -84,6 +83,7 @@ export default function Dashboard() {
             setIsTransactionOpen(false)
             setIsFacility(false)
             setSchedule(false)
+
         }
         else if (param == "Transaction"){
             setIsDashboardOpen(false)
@@ -91,6 +91,7 @@ export default function Dashboard() {
             setIsBookingOpen(false)
             setIsTransactionOpen(true)
             setIsFacility(false)
+            setSchedule(false)
             console.log("Transaction")
         }
         else if(isFacility){

@@ -41,7 +41,6 @@ export default function DashboardComponent({setIsFacility}) {
         const decoded = jwtDecode(token);
         // console.log(decoded);
         setFirstName(decoded.userData.first_name);
-        setMoney(decoded.userData.point);
 
         axios
             .get("http://localhost:3000/owner/getDashboard", {
@@ -92,6 +91,26 @@ export default function DashboardComponent({setIsFacility}) {
             .catch((error) => {
                 console.error('Error fetching dashboard data:', error);
             });
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const decoded = jwtDecode(token);
+            console.log(decoded.userData.id)
+            axios.get(
+                "http://localhost:3000/point", // Adjusted endpoint
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            ).then((response) =>{
+                console.log(response.data[0].point)
+                setMoney(response.data[0].point)
+            })
+
+        } catch (error) {
+            console.error("Error during withdrawal:", error.response ? error.response.data : error.message);
+            // Optionally handle error (e.g., show error message to user)
+        }
     }, []);
 
 

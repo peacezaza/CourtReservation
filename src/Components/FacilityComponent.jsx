@@ -3,8 +3,17 @@ import StadiumCard from "./StadiumCard.jsx";
 import {Icon} from "@iconify/react";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
+import UserAccountComponent from "./UserAccountComponent.jsx"
+import NotificationComponent from "./NotificationComponent.jsx";
 
 export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
+    const [money, setMoney] = useState(0)
+    const [ firstName, setFirstName] = useState("")
+    const [isOpenMenuAccount, setIsOpenMenuAccount] = useState(false);
+    const [OpenUserAccount, setOpenUserAccount] = useState(null);
+    const [OpenNotification, setOpenNotification] = useState(null);
 
     const [ isOpenOverlay, setIsOpenOverlay ] = useState(false)
     const [stadiums, setStadiums] = useState([]);
@@ -13,6 +22,12 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
     const itemsPerPage = 6;
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return; // Early return if no token
+
+        const decoded = jwtDecode(token);
+        // console.log(decoded);
+        setFirstName(decoded.userData.first_name);
         try {
             const token = localStorage.getItem("token");
             setLoading(true); // Start loading
@@ -26,6 +41,7 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
                             location: stadium.location.split(",")[1] + ", " + stadium.location.split(",")[2]
                         }));
                         setStadiums(formattedData);
+                        console.log(formattedData)
                     }
                     setLoading(false); // Stop loading
                 }).catch((error) => {
@@ -37,6 +53,25 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
             console.log(error);
             setLoading(false);
         }
+        try {
+            const token = localStorage.getItem("token");
+
+            const decoded = jwtDecode(token);
+            console.log(decoded.userData.id)
+            axios.get(
+                "http://localhost:3000/point", // Adjusted endpoint
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            ).then((response) =>{
+                console.log(response.data[0].point)
+                setMoney(response.data[0].point)
+            })
+
+        } catch (error) {
+            console.error("Error during withdrawal:", error.response ? error.response.data : error.message);
+            // Optionally handle error (e.g., show error message to user)
+        }
     }, []);
 
     // Calculate the total number of pages
@@ -47,7 +82,7 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
 
 
 
-    const money = 2000;
+    // const money = 2000;
     let date = new Date();
 
     const formettedDate = new Intl.DateTimeFormat('en-US', {
@@ -62,42 +97,111 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
         setIsOpenOverlay(true)
     }
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        console.log("Logout");
+        navigate("/")
+
+    }
+    const navigate = useNavigate();
+
+    const handleOpenNotification = () => {
+        setOpenNotification(prev => !prev); // Trigger state change on button click
+    }
+
+    const handleOpenUserAccount = () => {
+        setOpenUserAccount(prev => !prev); // Trigger state change on button click
+    }
 
     return (
         <div className="grid grid-rows-10 h-full overflow-y-hidden">
             <div className="row-span-1">
-                <div className="flex flex-col gap-3 ">
+                <div className="flex flex-col gap-3">
                     <div className=" flex flex-row items-center justify-end space-x-5 mr-3">
                         <div className="flex flex-row space-x-2 items-center">
                             <div>
                                 <Icon icon="noto:coin" className="w-9 h-9"/>
                             </div>
+
                             <div>{money}</div>
                         </div>
                         <div>
-                            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                 viewBox="0 0 24 24">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                      d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z"/>
-                            </svg>
+                            <button onClick={() => handleOpenNotification(null)}
+                                    className=" rounded-full  hover:bg-gray-300 "
+                            >
+
+                                <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
+                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black"
+                                     viewBox="0 0 24 24">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z"/>
+                                </svg>
+                            </button>
                         </div>
 
-                        <div>
-                            <svg className="w-[32px] h-[32px] text-gray-800 dark:text-white" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                                 viewBox="0 0 24 24">
-                                <path fill-rule="evenodd"
-                                      d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
-                                      clip-rule="evenodd"/>
-                            </svg>
+                        {/* MenuUser */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsOpenMenuAccount(!isOpenMenuAccount)}
+                                className=" rounded-full  hover:bg-gray-300 "
+                            >
+                                <svg
+                                    className="w-8 h-8 text-gray-800 dark:text-white"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="black"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
+                            {isOpenMenuAccount && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                                    <div className="px-4 py-2 flex items-center space-x-2">
+                                        <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"/>
+                                        </svg>
+                                        <span className="font-semibold">{firstName}</span>
+                                    </div>
+                                    <hr/>
+                                    <button
+                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                                        onClick={() => handleOpenUserAccount(null)}>
+                                        <svg className="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg"
+                                             fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"/>
+                                        </svg>
+                                        <span>My Account</span>
+                                    </button>
+                                    <hr/>
+                                    <button
+                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                                        onClick={handleLogout}>
+                                        <Icon icon="material-symbols:logout" className="w-5 h-5 text-gray-600"/>
+                                        <span>Logout</span>
+                                    </button>
+
+                                </div>
+                            )}
                         </div>
+
                     </div>
                     <div className="flex flex-row items-center justify-between">
                         <div></div>
                         <div>{formettedDate.toString()}</div>
                         <div className="">
-                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4" onClick={handleAddStadium}>Add Stadium
+                            <button className="rounded-xl border-2 py-1 bg-[#0F53B3] text-white px-4"
+                                    onClick={handleAddStadium}>Add Stadium
                             </button>
                         </div>
                     </div>
@@ -126,7 +230,8 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
                     <div className="grid grid-rows-8">
                         <div className=" row-span-7 grid grid-cols-3 gap-7 place-self-center">
                             {paginatedData.map((stadium, index) => (
-                                <StadiumCard key={index} {...stadium} setIsFacility={setIsFacility} setStadiumSelect={setStadiumSelect}/>
+                                <StadiumCard key={index} {...stadium} setIsFacility={setIsFacility}
+                                             setStadiumSelect={setStadiumSelect}/>
                             ))}
                         </div>
                         <div className="flex flex-row justify-between items-center">
@@ -161,7 +266,8 @@ export default function FacilityComponent({ setIsFacility, setStadiumSelect }) {
                     </div>
                 </div>
             }
-
+            {OpenNotification && <NotificationComponent onClose={() => setOpenNotification(null)} />}
+            {OpenUserAccount && <UserAccountComponent onClose={() => setOpenUserAccount(null)} />}
         </div>
     )
 }

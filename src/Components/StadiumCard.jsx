@@ -6,13 +6,13 @@ import { Fragment } from "react";
 import axios from "axios";
 import EditStadiumOverlay from "./EditStadiumOverlay";
 
-export default function StadiumCard({ id, name, location, rating, pictures, availability, setIsFacility, setStadiumSelect }) {
+export default function StadiumCard({ id, name, location, rating, pictures, availability, setIsFacility, setStadiumSelect, phone_number, open_hour, close_hour, location_link }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isUnderMaintenance, setIsUnderMaintenance] = useState(!availability);
     const menuRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpenEditOverlay, setIsOpenEditOverlay] = useState(false)
-    const stadium = { id, name, location, rating, pictures, availability: isUnderMaintenance };
+    const stadium = { id, name, location, rating, pictures, availability: isUnderMaintenance , phone_number, open_hour, close_hour };
 
     // ปิดเมนูเมื่อคลิกข้างนอก
     useEffect(() => {
@@ -135,7 +135,7 @@ export default function StadiumCard({ id, name, location, rating, pictures, avai
             </div>
             {isModalOpen && <StadiumDetailsModal stadium={stadium} onClose={handleClose} />}
             {isOpenEditOverlay && <div className="flex justify-center items-center h-full w-full">
-                <EditStadiumOverlay setIsOpenEditOverlay={setIsOpenEditOverlay} />
+                <EditStadiumOverlay setIsOpenEditOverlay={setIsOpenEditOverlay} stadium={stadium}/>
             </div>}
         </div>
     );

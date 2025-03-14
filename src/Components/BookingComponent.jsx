@@ -9,6 +9,7 @@ import ReviewComponent from "./ReviewComponent.jsx";
 import UserAccountComponent from "./UserAccountComponent.jsx"
 import NotificationComponent from "./NotificationComponent.jsx";
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 
 export default function BookingComponent({ setIsFacility }) {
     const [isOpenOverlay, setIsOpenOverlay] = useState(false)
@@ -25,6 +26,8 @@ export default function BookingComponent({ setIsFacility }) {
     const [OpenUserAccount, setOpenUserAccount] = useState(null);
     const [OpenNotification, setOpenNotification] = useState(null);
 
+    const [money, setMoney] = useState(0)
+    const [ firstName, setFirstName] = useState("")
     const navigate = useNavigate();
 
 
@@ -53,30 +56,6 @@ export default function BookingComponent({ setIsFacility }) {
 
 
 
-
-    // const reservationsData = [
-    //     { id: "6742", name: "Chris", contact: "(123) 456-395", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "1", date: "2025-01-05", time: "10.00 AM - 12.00 PM" },
-    //     { id: "4002", name: "John", contact: "(123) 456-207", stadium: "Sriracha Arena", facility: "Tennis", status: "Confirmed", amount: 300, courtnumber: "2", date: "2025-01-06", time: "12.00 PM - 2.00 PM" },
-    //     { id: "3605", name: "Isabellaa", contact: "(123) 456-191", stadium: "Ryummit", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "3", date: "2025-01-07", time: "2.00 PM - 4.00 PM" },
-    //     { id: "1647", name: "Chris", contact: "(123) 456-996", stadium: "Grand Stadium", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "4", date: "2025-01-08", time: "4.00 PM - 6.00 PM" },
-    //     { id: "6918", name: "Emily", contact: "(123) 456-414", stadium: "Sriracha Arena", facility: "Football", status: "Cancelled", amount: 150, courtnumber: "5", date: "2025-01-09", time: "6.00 PM - 8.00 PM" },
-    //     { id: "9063", name: "Lucas", contact: "(123) 456-662", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "6", date: "2025-01-10", time: "8.00 AM - 10.00 AM" },
-    //     { id: "5641", name: "Martin", contact: "(123) 456-974", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "7", date: "2025-01-11", time: "10.00 AM - 12.00 PM" },
-    //     { id: "6374", name: "Lily", contact: "(123) 456-909", stadium: "Grand Stadium", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "8", date: "2025-01-12", time: "12.00 PM - 2.00 PM" },
-    //     { id: "5307", name: "Pegasus", contact: "(123) 456-802", stadium: "Olympic Court", facility: "Football", status: "Confirmed", amount: 150, courtnumber: "9", date: "2025-01-13", time: "2.00 PM - 4.00 PM" },
-    //     { id: "7253", name: "Sarah", contact: "(123) 456-535", stadium: "Ryummit", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "10", date: "2025-01-14", time: "4.00 PM - 6.00 PM" },
-    //     { id: "6395", name: "Mason", contact: "(123) 456-512", stadium: "Ryummit", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "11", date: "2025-01-15", time: "6.00 PM - 8.00 PM" },
-    //     { id: "5985", name: "Sarah", contact: "(123) 456-110", stadium: "Olympic Court", facility: "Tennis", status: "Confirmed", amount: 150, courtnumber: "12", date: "2025-01-16", time: "8.00 AM - 10.00 AM" },
-    //     { id: "4312", name: "Alexander", contact: "(123) 456-157", stadium: "Grand Stadium", facility: "Football", status: "Confirmed", amount: 150, courtnumber: "13", date: "2025-01-17", time: "10.00 AM - 12.00 PM" },
-    //     { id: "7550", name: "Cecil", contact: "(123) 456-855", stadium: "Olympic Court", facility: "Basketball", status: "Confirmed", amount: 150, courtnumber: "14", date: "2025-01-18", time: "12.00 PM - 2.00 PM" },
-    //     { id: "2339", name: "Alexander", contact: "(123) 456-178", stadium: "Sriracha Arena", facility: "Badminton", status: "Cancelled", amount: 150, courtnumber: "15", date: "2025-01-19", time: "2.00 PM - 4.00 PM" },
-    //     { id: "2639", name: "Alexander", contact: "(123) 456-413", stadium: "Olympic Court", facility: "Badminton", status: "Confirmed", amount: 150, courtnumber: "16", date: "2025-01-20", time: "4.00 PM - 6.00 PM" },
-    //     { id: "7415", name: "Sophia", contact: "(123) 456-808", stadium: "Sriracha Arena", facility: "Tennis", status: "Cancelled", amount: 150, courtnumber: "17", date: "2025-01-21", time: "6.00 PM - 8.00 PM" },
-    //     { id: "5922", name: "Sophia", contact: "(123) 456-271", stadium: "Olympic Court", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "18", date: "2025-01-22", time: "8.00 AM - 10.00 AM" },
-    //     { id: "7158", name: "Lucas", contact: "(123) 456-942", stadium: "Grand Stadium", facility: "Badminton", status: "Confirmed", amount: 150, courtnumber: "19", date: "2025-01-23", time: "10.00 AM - 12.00 PM" },
-    //     { id: "6836", name: "Pegasus", contact: "(123) 456-566", stadium: "Sriracha Arena", facility: "Basketball", status: "Cancelled", amount: 150, courtnumber: "20", date: "2025-01-24", time: "12.00 PM - 2.00 PM" }
-    // ];
-
     const [reservations, setReservations] = useState([]);
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -98,6 +77,26 @@ export default function BookingComponent({ setIsFacility }) {
         }).catch((error) => {
             console.error("Error fetching stadium data:", error);
         });
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const decoded = jwtDecode(token);
+            console.log(decoded.userData.id)
+            axios.get(
+                "http://localhost:3000/point", // Adjusted endpoint
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            ).then((response) =>{
+                console.log(response.data[0].point)
+                setMoney(response.data[0].point)
+            })
+
+        } catch (error) {
+            console.error("Error during withdrawal:", error.response ? error.response.data : error.message);
+            // Optionally handle error (e.g., show error message to user)
+        }
     }, []);
 
 
@@ -228,7 +227,7 @@ export default function BookingComponent({ setIsFacility }) {
         }
     };
 
-    const money = 2000;
+    // const money = 2000;
     let date = new Date();
 
     const formettedDate = new Intl.DateTimeFormat('en-US', {
@@ -472,6 +471,7 @@ export default function BookingComponent({ setIsFacility }) {
                     />
                 )}
             </div>
+            {OpenNotification && <NotificationComponent onClose={() => setOpenNotification(null)} />}
             {/* Cancel Confirmation Overlay */}
             {isCancelOverlayOpen && bookingToCancel && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

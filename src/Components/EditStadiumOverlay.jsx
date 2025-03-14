@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import Multiselect from "multiselect-react-dropdown";
 import Select from "react-select";
 import axios from "axios";
-import { Icon } from "@iconify/react"; // นำเข้า Iconify compone
+import { Icon } from "@iconify/react";
 
-export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) {
+export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId, stadium }) {
     const typeOptions = ["Badminton", "Soccer", "Football", "Table Tennis"];
     const facilityOptions = ["Parking", "Bathroom"];
+
+    console.log("From Edit", stadium);
 
     const [files, setFiles] = useState([]);
     const [formData, setFormData] = useState({
@@ -18,8 +20,8 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
         subDistrict: "",
         zipCode: "",
         addressLink: "",
-        openHour: null,
-        closeHour: null,
+        openHour: null, // Will store { value: "08:00:00", label: "08:00:00" }
+        closeHour: null, // Will store { value: "23:00:00", label: "23:00:00" }
         selectedFacilities: [],
         selectedTypes: [],
         typeDetails: {},
@@ -27,43 +29,24 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
 
     const token = localStorage.getItem("token");
 
-    // ดึงข้อมูล stadium เดิมเมื่อ component โหลด
     useEffect(() => {
-        const fetchStadiumData = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3000/stadium/${stadiumId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = response.data;
-
-                // ปรับข้อมูลให้เข้ากับ formData
-                setFormData({
-                    stadium: data.stadium || "",
-                    phone: data.phone || "",
-                    country: data.country || "",
-                    province: data.province || "",
-                    district: data.district || "",
-                    subDistrict: data.subDistrict || "",
-                    zipCode: data.zipCode || "",
-                    addressLink: data.addressLink || "",
-                    openHour: data.openHour ? { value: data.openHour, label: data.openHour } : null,
-                    closeHour: data.closeHour ? { value: data.closeHour, label: data.closeHour } : null,
-                    selectedFacilities: data.selectedFacilities || [],
-                    selectedTypes: data.selectedTypes || [],
-                    typeDetails: data.typeDetails || {},
-                });
-
-                // ถ้ามีไฟล์ภาพในข้อมูลเดิม สามารถ setFiles ได้ที่นี่ (ถ้า backend ส่ง URL ภาพมา)
-                if (data.images) {
-                    setFiles(data.images); // ปรับตามโครงสร้างข้อมูลที่ backend ส่งมา
-                }
-            } catch (error) {
-                console.error("Error fetching stadium data:", error);
+        if (stadium) {
+            const locationParts = stadium.location.split(", ").map(part => part.trim());
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                stadium: stadium.name || "",           // "Arena"
+                phone: stadium.phone_number || "",     // "0800536270"
+                province: locationParts[0] || "",      // "Chachoengsao"
+                district: locationParts[1] || "",      // "Khlong Khuean"
+                openHour: stadium.open_hour ? { value: stadium.open_hour, label: stadium.open_hour } : null, // Format for Select
+                closeHour: stadium.close_hour ? { value: stadium.close_hour, label: stadium.close_hour } : null, // Format for Select
+                addressLink: stadium.location_link || "", // Not in object, so empty
+            }));
+            if (stadium.pictures && stadium.pictures.length > 0) {
+                setFiles(stadium.pictures); // ["http://localhost:3000/uploads/imageNotFound.jpg"]
             }
-        };
-
-        fetchStadiumData();
-    }, [stadiumId, token]);
+        }
+    }, [stadium]);
 
     const handleFileChange = (event) => {
         setFiles(Array.from(event.target.files));
@@ -146,7 +129,7 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
         setFormData((prev) => ({
             ...prev,
             [field]: value,
-            ...(field === "openHour" ? { closeHour: null } : {}),
+            ...(field === "openHour" ? { closeHour: null } : {}), // Reset closeHour if openHour changes
         }));
     };
 
@@ -179,7 +162,7 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
                                         className="relative w-14 h-14 bg-[#D0D3D9] rounded-full flex justify-center items-center overflow-hidden"
                                     >
                                         <img
-                                            src={typeof file === "string" ? file : URL.createObjectURL(file)} // ถ้าเป็น URL จาก backend หรือไฟล์ใหม่
+                                            src={typeof file === "string" ? file : URL.createObjectURL(file)}
                                             alt={`Selected Image ${index}`}
                                             className="w-full h-full object-cover"
                                         />
@@ -213,7 +196,7 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
                                 <p className="font-semibold text-[#383E49]">Stadium</p>
                                 <input
                                     type="text"
-                                    value={formData.stadium} //เชื่อม back ที
+                                    value={formData.stadium}
                                     readOnly
                                     className="px-2 w-full h-10 border-[1px] rounded-md border-[#B9BDC7] bg-gray-100"
                                 />
@@ -300,6 +283,7 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
                                     value={formData.openHour}
                                     onChange={(value) => handleHourChange("openHour", value)}
                                     menuPlacement="auto"
+                                    placeholder="Select Open Hour"
                                 />
                                 <Icon
                                     icon="ph:note-pencil-bold"
@@ -314,6 +298,7 @@ export default function EditStadiumOverlay({ setIsOpenEditOverlay, stadiumId }) 
                                     options={getFilteredCloseHours()}
                                     value={formData.closeHour}
                                     onChange={(value) => handleHourChange("closeHour", value)}
+                                    placeholder="Select Close Hour"
                                 />
                                 <Icon
                                     icon="ph:note-pencil-bold"
